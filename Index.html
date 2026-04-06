@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>写メ日記BOT</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; color: #333; }
+.app { max-width: 480px; margin: 0 auto; min-height: 100vh; background: #fff; position: relative; }
+.header { background: linear-gradient(135deg, #ff6b9d, #c751c0, #6e7cf7); padding: 20px; text-align: center; color: #fff; }
+.header h1 { font-size: 22px; margin-bottom: 4px; }
+.header p { font-size: 12px; opacity: 0.9; }
+.tabs { display: flex; background: #f8f8f8; border-bottom: 1px solid #eee; }
+.tab { flex: 1; padding: 12px; text-align: center; font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; }
+.tab.active { color: #c751c0; border-bottom-color: #c751c0; background: #fff; }
+.content { padding: 16px; display: none; }
+.content.active { display: block; }
+.section { margin-bottom: 20px; }
+.section-title { font-size: 14px; font-weight: 700; color: #6e7cf7; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.input-group { margin-bottom: 12px; }
+.input-group label { display: block; font-size: 12px; font-weight: 600; color: #666; margin-bottom: 4px; }
+.input-group input, .input-group select, .input-group textarea { width: 100%; padding: 10px 12px; border: 1.5px solid #ddd; border-radius: 10px; font-size: 14px; transition: border-color 0.3s; font-family: inherit; }
+.input-group input:focus, .input-group select:focus, .input-group textarea:focus { outline: none; border-color: #c751c0; }
+textarea { resize: vertical; min-height: 60px; }
+.chara-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.chara-card { padding: 10px; border: 2px solid #eee; border-radius: 12px; cursor: pointer; transition: all 0.3s; font-size: 12px; }
+.chara-card.selected { border-color: #c751c0; background: linear-gradient(135deg, #fff5f9, #f5f0ff); }
+.chara-card .chara-emoji { font-size: 20px; }
+.chara-card .chara-name { font-weight: 700; font-size: 13px; margin-top: 4px; }
+.chara-card .chara-desc { color: #888; margin-top: 2px; line-height: 1.4; }
+.btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.3s; }
+.btn-primary { background: linear-gradient(135deg, #ff6b9d, #c751c0); color: #fff; }
+.btn-primary:active { transform: scale(0.98); }
+.btn-secondary { background: #f0f0f0; color: #666; margin-top: 8px; }
+.category-btns { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.cat-btn { padding: 8px 14px; border: 1.5px solid #ddd; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.3s; background: #fff; }
+.cat-btn.selected { border-color: #c751c0; background: linear-gradient(135deg, #fff5f9, #f5f0ff); color: #c751c0; font-weight: 600; }
+.output-card { background: #fafafa; border: 1px solid #eee; border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+.output-card .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.output-card .card-num { font-size: 11px; background: linear-gradient(135deg, #ff6b9d, #c751c0); color: #fff; padding: 2px 10px; border-radius: 10px; font-weight: 700; }
+.output-card .card-time { font-size: 11px; color: #999; }
+.output-card .card-category { font-size: 11px; color: #6e7cf7; font-weight: 600; }
+.output-card .card-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.output-card .card-body { font-size: 13px; line-height: 1.8; white-space: pre-wrap; color: #555; }
+.output-card .card-meta { margin-top: 10px; font-size: 11px; color: #999; display: flex; gap: 12px; }
+.copy-btn { font-size: 11px; padding: 4px 12px; border: 1px solid #c751c0; color: #c751c0; background: #fff; border-radius: 8px; cursor: pointer; }
+.copy-btn:active { background: #c751c0; color: #fff; }
+.tip-box { background: linear-gradient(135deg, #fff5f9, #f5f0ff); border-radius: 12px; padding: 14px; margin-bottom: 16px; }
+.tip-box .tip-title { font-size: 13px; font-weight: 700; color: #c751c0; margin-bottom: 6px; }
+.tip-box .tip-text { font-size: 12px; color: #666; line-height: 1.6; }
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.stat-card { background: #f8f8f8; border-radius: 10px; padding: 12px; text-align: center; }
+.stat-card .stat-num { font-size: 22px; font-weight: 700; color: #c751c0; }
+.stat-card .stat-label { font-size: 10px; color: #999; margin-top: 2px; }
+.hidden { display: none !important; }
+.loading { text-align: center; padding: 40px; }
+.loading .spinner { width: 40px; height: 40px; border: 3px solid #eee; border-top-color: #c751c0; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 8px; font-weight: 600; }
+.badge-limited { background: #fff0f5; color: #e74c8c; }
+.badge-public { background: #f0f8ff; color: #4a90d9; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>写メ日記BOT</h1>
+    <p>ランキング上位分析に基づく日記自動生成</p>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="setup">初期設定</div>
+    <div class="tab" data-tab="single">1本生成</div>
+    <div class="tab" data-tab="batch">1日分生成</div>
+    <div class="tab" data-tab="tips">攻略法</div>
+  </div>
+
+  <!-- 初期設定 -->
+  <div class="content active" id="setup">
+    <div class="section">
+      <div class="section-title">キャストプロフィール</div>
+      <div class="input-group">
+        <label>源氏名</label>
+        <input type="text" id="castName" placeholder="例: りあら">
+      </div>
+      <div class="input-group">
+        <label>年齢</label>
+        <input type="number" id="castAge" placeholder="例: 23">
+      </div>
+      <div class="input-group">
+        <label>在籍店名</label>
+        <input type="text" id="shopName" placeholder="例: GINGIRA☆TOKYO">
+      </div>
+      <div class="input-group">
+        <label>エリア</label>
+        <select id="area">
+          <option value="新宿">新宿・歌舞伎町</option>
+          <option value="池袋">池袋</option>
+          <option value="渋谷">渋谷</option>
+          <option value="五反田">五反田・品川</option>
+          <option value="鶯谷">鶯谷・上野</option>
+          <option value="錦糸町">錦糸町</option>
+          <option value="新橋">新橋・銀座</option>
+          <option value="吉原">吉原</option>
+          <option value="その他">その他</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label>得意プレイ・売りポイント</label>
+        <input type="text" id="specialty" placeholder="例: 甘えイチャイチャ、密着">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">キャラ戦略を選択</div>
+      <div class="chara-grid">
+        <div class="chara-card" data-chara="A">
+          <div class="chara-emoji">😈💜</div>
+          <div class="chara-name">小悪魔甘え型</div>
+          <div class="chara-desc">可愛い×エロの二刀流</div>
+        </div>
+        <div class="chara-card" data-chara="B">
+          <div class="chara-emoji">🏠♥️</div>
+          <div class="chara-name">親しみ日常型</div>
+          <div class="chara-desc">彼女感・隣のお姉さん</div>
+        </div>
+        <div class="chara-card" data-chara="C">
+          <div class="chara-emoji">👑✨</div>
+          <div class="chara-name">カリスマ権威型</div>
+          <div class="chara-desc">人気嬢の余裕と実績</div>
+        </div>
+        <div class="chara-card" data-chara="D">
+          <div class="chara-emoji">🔞❤️</div>
+          <div class="chara-name">過激エロ特化型</div>
+          <div class="chara-desc">動画×セクシーで攻める</div>
+        </div>
+        <div class="chara-card" data-chara="E">
+          <div class="chara-emoji">🩷🫣</div>
+          <div class="chara-name">清楚マメ接客型</div>
+          <div class="chara-desc">丁寧×初々しさ</div>
+        </div>
+        <div class="chara-card" data-chara="F">
+          <div class="chara-emoji">💖🎤</div>
+          <div class="chara-name">アイドル推し活型</div>
+          <div class="chara-desc">ファン参加型・応援</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="input-group">
+        <label>よく使う絵文字（任意）</label>
+        <input type="text" id="emojis" placeholder="例: 💜💕🐰✨">
+      </div>
+      <div class="input-group">
+        <label>NGワード（任意）</label>
+        <input type="text" id="ngWords" placeholder="例: ○○、△△">
+      </div>
+      <div class="input-group">
+        <label>外部SNSアカウント（任意）</label>
+        <input type="text" id="sns" placeholder="例: Twitter @xxx, TikTok @xxx">
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="saveProfile()">プロフィールを保存</button>
+    <div id="saveMsg" class="hidden" style="text-align:center;color:#c751c0;font-weight:600;margin-top:12px;font-size:14px;">保存しました！</div>
+  </div>
+
+  <!-- 1本生成 -->
+  <div class="content" id="single">
+    <div class="section">
+      <div class="section-title">カテゴリを選択</div>
+      <div class="category-btns">
+        <div class="cat-btn selected" data-cat="sexy">セクシー系</div>
+        <div class="cat-btn" data-cat="attend">出勤告知</div>
+        <div class="cat-btn" data-cat="thanks">お礼日記</div>
+        <div class="cat-btn" data-cat="daily">日常系</div>
+        <div class="cat-btn" data-cat="soldout">完売アピール</div>
+        <div class="cat-btn" data-cat="video">動画/SNS</div>
+      </div>
+    </div>
+
+    <!-- お礼日記専用：お礼相手入力エリア -->
+    <div class="section hidden" id="thanksSection">
+      <div class="section-title">お礼する相手（お礼日記用）</div>
+      <div id="thanksNames">
+        <div class="thanks-row" style="display:flex;gap:6px;margin-bottom:8px;align-items:center;">
+          <input type="text" class="thanks-name" placeholder="お名前（ヘブンネーム等）" style="flex:1;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;">
+          <input type="text" class="thanks-memo" placeholder="ひとことメモ（任意）" style="flex:1;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;">
+        </div>
+      </div>
+      <button class="btn btn-secondary" onclick="addThanksRow()" style="font-size:13px;padding:8px;">＋ お礼相手を追加</button>
+      <div class="input-group" style="margin-top:10px;">
+        <label>お礼スタイル</label>
+        <select id="thanksStyle">
+          <option value="individual">1人ずつ個別にお礼</option>
+          <option value="list">まとめてリスト形式</option>
+          <option value="short">名前だけサクッと</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="input-group">
+        <label>追加情報（任意）</label>
+        <textarea id="extraInfo" placeholder="例: 今日は18時から出勤、○○さんと○○さんが来てくれた、新しい下着買った"></textarea>
+      </div>
+      <div class="input-group">
+        <label>公開設定</label>
+        <select id="visibility">
+          <option value="public">一般公開</option>
+          <option value="limited">マイガール限定</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="generateSingle()">日記を生成</button>
+    <div id="singleOutput" class="hidden" style="margin-top:16px;"></div>
+  </div>
+
+  <!-- 1日分生成 -->
+  <div class="content" id="batch">
+    <div class="section">
+      <div class="section-title">カテゴリ別の本数</div>
+      <div class="tip-box" style="padding:10px;margin-bottom:12px;">
+        <div class="tip-text" style="font-size:11px;">各カテゴリの本数を設定してください。合計 <strong id="batchTotal">10</strong> 本生成されます。</div>
+      </div>
+      <div id="batchCatGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div class="batch-cat-row" style="display:flex;align-items:center;gap:6px;background:#fafafa;border-radius:10px;padding:8px 10px;">
+          <span style="font-size:12px;flex:1;">セクシー系</span>
+          <button onclick="adjustCat('sexy',-1)" style="width:28px;height:28px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:16px;cursor:pointer;">−</button>
+          <span id="cnt_sexy" style="font-size:15px;font-weight:700;width:20px;text-align:center;">3</span>
+          <button onclick="adjustCat('sexy',1)" style="width:28px;height:28px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:16px;cursor:pointer;">＋</button>
+        </div>
+        <div class="batch-cat-row" style="display:flex;align-items:center;gap:6px;background:#fafafa;border-radius:10px;padding:8px 10px;">
+          <span style="font-size:12px;flex:1;">出勤告知</span>
+          <button onclick="adjustCat('attend',-1)" style="width:28px;height:28px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:16px;cursor:pointer;">−</button>
+          <span id="cnt_attend" style="font-size:15px;font-weight:700;width:20px;text-align:center;">2</span>
+          <button onclick="adjustCat('attend',1)" style="width:28px;height:28px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:16px;cursor:pointer;">＋</button>
+        </div>
+        <div class="batch-cat-row" style="display:flex;align-items:center;gap:6px;background:#fafafa;border-radius:10px;padding:8px 10px;">
+          <span style="font-size:12px;flex:1;">お礼日記</span>
+          <button onclick="adjustCat('thanks',-1)" style="width:28px;height:28px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:16px;cursor:pointer;">−</button>
+          <span id="cnt_thanks" style="font-size:15px;font-weight:700;width:20px;text-align:center;">1</span>
+          <button onclick="adjustCat('thanks',1)" style="width:28px;height:28px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:16px;cursor:pointer;">＋</button>
+        </div>
+        <div class="batch-cat-row" style="display:flex;align-items:center;gap:6px;background:#fafafa;border-radius:10px;padding:8px 10px;">
+          <span style="font-size:12px;flex:1;">日常系</span>
+          <button onclick="adjustCat('daily',-1)" style="width:28px;height:28px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:16px;cursor:pointer;">−</button>
+          <span id="cnt_daily" style="font-size:15px;font-weight:700;width:20px;text-align:center;">2</span>
+          <button onclick="adjustCat('daily',1)" style="width:28px;height:28px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:16px;cursor:pointer;">＋</button>
+        </div>
+        <div class="batch-cat-row" style="display:flex;align-items:center;gap:6px;background:#fafafa;border-radius:10px;padding:8px 10px;">
+          <span style="font-size:12px;flex:1;">完売アピール</span>
+          <button onclick="adjustCat('soldout',-1)" style="width:28px;height:28px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:16px;cursor:pointer;">−</button>
+          <span id="cnt_soldout" style="font-size:15px;font-weight:700;width:20px;text-align:center;">1</span>
+          <button onclick="adjustCat('soldout',1)" style="width:28px;height:28px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:16px;cursor:pointer;">＋</button>
+        </div>
+        <div class="batch-cat-row" style="display:flex;align-items:center;gap:6px;background:#fafafa;border-radius:10px;padding:8px 10px;">
+          <span style="font-size:12px;flex:1;">動画/SNS</span>
+          <button onclick="adjustCat('video',-1)" style="width:28px;height:28px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:16px;cursor:pointer;">−</button>
+          <span id="cnt_video" style="font-size:15px;font-weight:700;width:20px;text-align:center;">1</span>
+          <button onclick="adjustCat('video',1)" style="width:28px;height:28px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:16px;cursor:pointer;">＋</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <button class="btn btn-secondary" onclick="applyPreset('work')" style="font-size:11px;padding:6px;">出勤日おすすめ(10本)</button>
+        <button class="btn btn-secondary" onclick="applyPreset('off')" style="font-size:11px;padding:6px;">非出勤日おすすめ(5本)</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="input-group">
+        <label>出勤時間（出勤日の場合）</label>
+        <input type="text" id="workTime" placeholder="例: 18:00〜翌3:00">
+      </div>
+      <div class="input-group">
+        <label>今日の特記事項（任意）</label>
+        <textarea id="batchNote" placeholder="例: 新しいコスプレ衣装がある、イベント開催中"></textarea>
+      </div>
+    </div>
+
+    <!-- 一括生成用：お礼相手（お礼日記が1本以上の時に表示） -->
+    <div class="section hidden" id="batchThanksSection">
+      <div class="section-title">お礼する相手（お礼日記用）</div>
+      <div id="batchThanksNames">
+        <div class="batch-thanks-row" style="display:flex;gap:6px;margin-bottom:8px;align-items:center;">
+          <input type="text" class="batch-thanks-name" placeholder="お名前" style="flex:1;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;">
+          <input type="text" class="batch-thanks-memo" placeholder="ひとことメモ（任意）" style="flex:1;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;">
+        </div>
+      </div>
+      <button class="btn btn-secondary" onclick="addBatchThanksRow()" style="font-size:13px;padding:8px;">＋ お礼相手を追加</button>
+      <div class="input-group" style="margin-top:10px;">
+        <label>お礼スタイル</label>
+        <select id="batchThanksStyle">
+          <option value="individual">1人ずつ個別にお礼</option>
+          <option value="list">まとめてリスト形式</option>
+          <option value="short">名前だけサクッと</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="generateBatch()">1日分を一括生成</button>
+    <div id="batchOutput" class="hidden" style="margin-top:16px;"></div>
+  </div>
+
+  <!-- 攻略法 -->
+  <div class="content" id="tips">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num">8-10</div><div class="stat-label">1日の投稿目標</div></div>
+      <div class="stat-card"><div class="stat-num">15</div><div class="stat-label">タイトル文字数上限</div></div>
+      <div class="stat-card"><div class="stat-num">30%</div><div class="stat-label">限定日記の比率</div></div>
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-title">投稿内容の黄金比率</div>
+      <div class="tip-text">
+        セクシー系 30% / 出勤・空き告知 20% / お礼日記 15% / 日常系 15% / 完売アピール 10% / SNS宣伝 10%
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-title">ランキングUPの10の法則</div>
+      <div class="tip-text">
+        1. 1日5本以上、理想は8〜10本<br>
+        2. タイトル15文字以内+絵文字必須<br>
+        3. 動画を積極活用（▶️マーク）<br>
+        4. マイガール限定を30〜50%混ぜる<br>
+        5. 内容のバリエーションを持つ<br>
+        6. お礼日記で客の名前を挙げる<br>
+        7. 完売アピールで人気感を演出<br>
+        8. 非出勤日も毎日投稿する<br>
+        9. 外部SNS（Twitter/TikTok）と連携<br>
+        10. 朝〜深夜まで時間帯を分散
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-title">推奨タイムライン（出勤日）</div>
+      <div class="tip-text">
+        8-10時: おはよう系<br>
+        10-12時: 日常/告知<br>
+        12-14時: セクシー（軽め）<br>
+        14-16時: 空き枠案内<br>
+        16-18時: 動画/限定<br>
+        18-19時: セクシー（本気）<br>
+        19-20時: 出勤報告<br>
+        20-22時: お礼日記<br>
+        22-24時: 退勤/完売<br>
+        0-2時: おやすみ系
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-title">キャラ別攻略ポイント</div>
+      <div class="tip-text">
+        <b>小悪魔甘え:</b> 「〜してあげる💜」構文が鍵<br>
+        <b>親しみ日常:</b> 食事・趣味の写真を多めに<br>
+        <b>カリスマ:</b> 実績数字を具体的に出す<br>
+        <b>過激エロ:</b> 動画▶️マーク+時間限定が効果大<br>
+        <b>清楚マメ:</b> 空き枠情報を丁寧にこまめに<br>
+        <b>アイドル:</b> 投票・YouTube等でファン参加を促す
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// State
+let profile = JSON.parse(localStorage.getItem('diaryBotProfile') || 'null') || {};
+let selectedChara = profile.chara || '';
+let selectedCat = 'sexy';
+
+// Tab switching
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+  });
+});
+
+// Chara selection
+document.querySelectorAll('.chara-card').forEach(card => {
+  if (card.dataset.chara === selectedChara) card.classList.add('selected');
+  card.addEventListener('click', () => {
+    document.querySelectorAll('.chara-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    selectedChara = card.dataset.chara;
+  });
+});
+
+// Category selection
+document.querySelectorAll('.cat-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedCat = btn.dataset.cat;
+    // お礼日記選択時のみお礼相手入力を表示
+    const ts = document.getElementById('thanksSection');
+    if (selectedCat === 'thanks') { ts.classList.remove('hidden'); } else { ts.classList.add('hidden'); }
+  });
+});
+
+// お礼相手の行を追加
+function addThanksRow() {
+  const container = document.getElementById('thanksNames');
+  const row = document.createElement('div');
+  row.className = 'thanks-row';
+  row.style.cssText = 'display:flex;gap:6px;margin-bottom:8px;align-items:center;';
+  row.innerHTML = '<input type="text" class="thanks-name" placeholder="お名前" style="flex:1;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;">'
+    + '<input type="text" class="thanks-memo" placeholder="ひとことメモ（任意）" style="flex:1;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;">'
+    + '<button onclick="this.parentElement.remove()" style="background:none;border:none;color:#e74c8c;font-size:18px;cursor:pointer;padding:0 4px;">×</button>';
+  container.appendChild(row);
+}
+
+// お礼相手データを取得
+function getThanksData() {
+  const rows = document.querySelectorAll('.thanks-row');
+  const data = [];
+  rows.forEach(row => {
+    const name = row.querySelector('.thanks-name').value.trim();
+    const memo = row.querySelector('.thanks-memo').value.trim();
+    if (name) data.push({ name, memo });
+  });
+  return data;
+}
+
+// お礼フレーズ素材
+const thanksOpeners = [
+  () => `ありがとう${getEmoji()}`,
+  () => `来てくれてありがとう${getEmoji()}`,
+  () => `会えて嬉しかった${getEmoji()}`,
+  () => `楽しかったよ${getEmoji()}`,
+  () => `めちゃ楽しかった${getEmoji()}`,
+  () => `幸せな時間だった${getEmoji()}`,
+  () => `最高だったよ${getEmoji()}`,
+  () => `大好き${getEmoji()}`,
+  () => `またね${getEmoji()}`,
+  () => `また会いたい${getEmoji()}`,
+  () => `ほんとにありがとう${getEmoji()}`,
+  () => `感謝${getEmoji()}`,
+  () => `嬉しすぎた${getEmoji()}`,
+  () => `キュンとした${getEmoji()}`,
+  () => `すごく癒された${getEmoji()}`
+];
+const thanksClosers = [
+  () => `また来てね${getEmoji()}`,
+  () => `次も楽しみにしてるね${getEmoji()}`,
+  () => `いつでも待ってるよ${getEmoji()}`,
+  () => `絶対また会おうね${getEmoji()}`,
+  () => `次はもっと楽しもうね${getEmoji()}`,
+  () => `ずっと応援してね${getEmoji()}`,
+  () => `${getName()}はいつでも待ってる${getEmoji()}`,
+  () => `指名してくれて嬉しい${getEmoji()}`,
+  () => `大好きだよ${getEmoji()}`,
+  () => `忘れないよ${getEmoji()}`
+];
+const thanksIndividual = [
+  (name,e) => `${name}さん${e}\n${pickRandom(thanksOpeners)()}`,
+  (name,e) => `${name}さんへ${e}\n来てくれて本当に嬉しかった${getEmoji()}`,
+  (name,e) => `${name}さん${e}\nあっという間だったね${getEmoji()}`,
+  (name,e) => `${name}さん${e}\n今日は本当にありがとう${getEmoji()}`,
+  (name,e) => `${name}さん${e}\nめちゃくちゃ楽しかった${getEmoji()}`,
+  (name,e) => `${name}さんへ${e}\n会えて幸せだった${getEmoji()}`,
+  (name,e) => `${name}さん${e}\n笑顔が素敵だったよ${getEmoji()}`,
+  (name,e) => `${name}さん${e}\n優しくしてくれてありがとう${getEmoji()}`,
+  (name,e) => `${name}さん${e}\nドキドキしちゃった${getEmoji()}`,
+  (name,e) => `${name}さん${e}\n一緒にいて癒された${getEmoji()}`,
+  (name,e) => `${name}さんへ${e}\n${getName()}のこと覚えててね${getEmoji()}`,
+  (name,e) => `${name}さん${e}\nまた指名してくれたら嬉しいな${getEmoji()}`,
+  (name,e) => `${name}さん${e}\n差し入れもありがとう${getEmoji()}`,
+  (name,e) => `${name}さん${e}\n話も楽しかったし最高${getEmoji()}`,
+  (name,e) => `${name}さんへ${e}\n次会えるの楽しみにしてるね${getEmoji()}`
+];
+const thanksListHeaders = [
+  () => `今日来てくれた方${getEmoji()}`,
+  () => `本日のお礼${getEmoji()}`,
+  () => `会えた皆さんへ${getEmoji()}`,
+  () => `今日もたくさんの出会い${getEmoji()}`,
+  () => `感謝の気持ちを込めて${getEmoji()}`,
+  () => `ひとりひとりにありがとう${getEmoji()}`,
+  () => `今日のお礼日記${getEmoji()}`,
+  () => `素敵な時間をくれた方へ${getEmoji()}`
+];
+const thanksListFooters = [
+  () => `\nみんなありがとう${getEmoji()}\n${pickRandom(thanksClosers)()}`,
+  () => `\nみんな大好き${getEmoji()}\n${pickRandom(thanksClosers)()}`,
+  () => `\n今日も幸せでした${getEmoji()}\n${pickRandom(thanksClosers)()}`,
+  () => `\n最高の1日にしてくれて\nありがとう${getEmoji()}\n${pickRandom(thanksClosers)()}`,
+  () => `\nひとりひとりとの時間が\n全部宝物${getEmoji()}\n${pickRandom(thanksClosers)()}`,
+  () => `\n${getName()}は世界一幸せ者${getEmoji()}\n${pickRandom(thanksClosers)()}`
+];
+
+// お礼テキスト生成
+function buildThanksText(thanksData, style) {
+  if (thanksData.length === 0) return '';
+  const e = getEmoji;
+  if (style === 'individual') {
+    return '\n\n' + thanksData.map(d => {
+      const base = pickRandom(thanksIndividual)(d.name, e());
+      return d.memo ? `${base}\n${d.memo}` : base;
+    }).join('\n\n') + '\n\n' + pickRandom(thanksClosers)();
+  } else if (style === 'list') {
+    const header = pickRandom(thanksListHeaders)();
+    const names = thanksData.map(d => `${d.name}さん${d.memo ? '（' + d.memo + '）' : ''}${e()}`).join('\n');
+    const footer = pickRandom(thanksListFooters)();
+    return `\n\n${header}\n\n${names}${footer}`;
+  } else {
+    const opener = pickRandom(thanksOpeners)();
+    return `\n\n${thanksData.map(d => d.name + 'さん').join('、')}${e()}\n${opener}\n${pickRandom(thanksClosers)()}`;
+  }
+}
+
+// Save profile
+function saveProfile() {
+  profile = {
+    name: document.getElementById('castName').value,
+    age: document.getElementById('castAge').value,
+    shop: document.getElementById('shopName').value,
+    area: document.getElementById('area').value,
+    specialty: document.getElementById('specialty').value,
+    chara: selectedChara,
+    emojis: document.getElementById('emojis').value,
+    ngWords: document.getElementById('ngWords').value,
+    sns: document.getElementById('sns').value
+  };
+  try { localStorage.setItem('diaryBotProfile', JSON.stringify(profile)); } catch(e) {}
+  document.getElementById('saveMsg').classList.remove('hidden');
+  setTimeout(() => document.getElementById('saveMsg').classList.add('hidden'), 2000);
+}
+
+// Load profile
+if (profile.name) {
+  document.getElementById('castName').value = profile.name || '';
+  document.getElementById('castAge').value = profile.age || '';
+  document.getElementById('shopName').value = profile.shop || '';
+  document.getElementById('area').value = profile.area || '新宿';
+  document.getElementById('specialty').value = profile.specialty || '';
+  document.getElementById('emojis').value = profile.emojis || '';
+  document.getElementById('ngWords').value = profile.ngWords || '';
+  document.getElementById('sns').value = profile.sns || '';
+}
+
+// Character templates
+const charaStyles = {
+  A: { suffix: ['だよ💜','しちゃう❓','してあげる💕','ね💜','かも…💜'], emojis: ['💜','💕','❓','🔞','💎','🐰'], pronoun: 'あたし' },
+  B: { suffix: ['だよ♥️','した！','なの😊','よね🍽','かな♥️'], emojis: ['♥️','😊','🍽','🌸','🍺','☀️'], pronoun: 'わたし' },
+  C: { suffix: ['だよ✨','だから！','してね！！！','よ♡','でしょ✨'], emojis: ['✨','👑','💫','🔥','♡','🎀'], pronoun: 'わたし' },
+  D: { suffix: ['よ❤️','だよ🩷','してね🔞','…🩷','えちえち🔞'], emojis: ['❤️','🩷','🔞','▶️','㊙️','💦'], pronoun: 'わたし' },
+  E: { suffix: ['です🩷','ます💗','かな？🫣','ください💗','ね🩷'], emojis: ['🩷','💗','🙆‍♀️','🫣','💦','🌟'], pronoun: 'わたし' },
+  F: { suffix: ['だよ💖','してね💛','ー！🩵','よろしく💖','ね🥺'], emojis: ['💛','💖','🩵','💕','🥺','🎤'], pronoun: '' }
+};
+
+function getStyle() {
+  const c = selectedChara || 'A';
+  return charaStyles[c] || charaStyles.A;
+}
+
+function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function getEmoji() {
+  const custom = profile.emojis ? profile.emojis.match(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu) : null;
+  if (custom && custom.length > 0 && Math.random() > 0.5) return pickRandom(custom);
+  return pickRandom(getStyle().emojis);
+}
+
+function getName() { return profile.name || 'あなた'; }
+
+// ---- 季節・曜日ネタ素材 ----
+const seasonTopics = {
+  spring: ['桜','お花見','新生活','春コーデ','いちご','花粉症','春の匂い','卒業','入学','ピクニック','桜餅','菜の花','春一番','たけのこ','チューリップ'],
+  summer: ['海','プール','花火','夏祭り','かき氷','日焼け','浴衣','冷やし中華','スイカ','アイス','ビアガーデン','風鈴','蚊取り線香','朝顔','ひまわり'],
+  autumn: ['紅葉','ハロウィン','秋の味覚','焼き芋','栗','コスモス','読書の秋','食欲の秋','もみじ','秋刀魚','ぶどう','お月見','銀杏','柿','きのこ'],
+  winter: ['クリスマス','イルミネーション','鍋','こたつ','雪','バレンタイン','温泉','ホットチョコ','冬コーデ','年末','みかん','おでん','マフラー','雪だるま','湯豆腐']
+};
+const now = new Date();
+const month = now.getMonth();
+const season = month>=2&&month<=4?'spring':month>=5&&month<=7?'summer':month>=8&&month<=10?'autumn':'winter';
+const sTopic = () => pickRandom(seasonTopics[season]);
+const weekday = ['日','月','火','水','木','金','土'][now.getDay()];
+const foods = ['パスタ','お寿司','焼肉','ラーメン','カレー','タピオカ','ケーキ','うどん','ピザ','オムライス','唐揚げ','サラダ','チーズケーキ','アイス','クレープ','餃子','ハンバーグ','お鍋','フルーツ','プリン','お好み焼き','天ぷら','ステーキ','サンドイッチ','牛丼','もんじゃ','たこ焼き','エビフライ','抹茶ラテ','パンケーキ','フレンチトースト','肉まん','焼きそば','スムージー','アサイーボウル'];
+const hobbies = ['ネトフリ','YouTube','ゲーム','漫画','ネイル','ショッピング','カフェ巡り','ヨガ','ストレッチ','アニメ','映画','TikTok','推し活','コスプレ','料理','半身浴','お散歩','ドライブ','カラオケ','お絵描き','読書','筋トレ','占い','マッサージ','パック','アロマ','ピラティス','ボウリング','ダーツ','写真撮影'];
+const places = ['カフェ','コンビニ','スタバ','本屋','雑貨屋','ドンキ','マック','公園','映画館','デパート','ネカフェ','サウナ','温泉','水族館','動物園','美容院'];
+const adjectives = ['かわいい','やばい','最高','幸せ','ドキドキ','キュンキュン','ふわふわ','とろける','えちえち','いい感じ','テンション上がる','楽しい','嬉しい','大好き','たまらない'];
+const bodyParts = ['くびれ','鎖骨','うなじ','太もも','背中','お尻','胸元','腰','肩','足'];
+const lingerie = ['新しい下着','レースの下着','黒い下着','白い下着','可愛い下着','セクシーランジェリー','お気に入りの下着','透け透けの下着'];
+const timeGreets = () => { const h = now.getHours(); return h < 11 ? 'おはよう' : h < 17 ? 'こんにちは' : 'こんばんは'; };
+const rPlace = () => pickRandom(places);
+const rFood = () => pickRandom(foods);
+const rHobby = () => pickRandom(hobbies);
+const rAdj = () => pickRandom(adjectives);
+const rBody = () => pickRandom(bodyParts);
+const rLingerie = () => pickRandom(lingerie);
+
+// ---- タイトル・本文テンプレート大幅強化 ----
+const templates = {
+  sexy: {
+    titles: [
+      () => `むぎゅっ${getEmoji()}`,
+      () => `誘われちゃった${getEmoji()}`,
+      () => `ギリギリ…🔞`,
+      () => `可愛がってあげる${getEmoji()}`,
+      () => `チラッ${getEmoji()}${getEmoji()}`,
+      () => `ドキドキしちゃう${getEmoji()}`,
+      () => `内緒だよ${getEmoji()}`,
+      () => `見ちゃダメ${getEmoji()}🔞`,
+      () => `触れたい…${getEmoji()}`,
+      () => `甘い夜${getEmoji()}`,
+      () => `ぎゅーって${getEmoji()}`,
+      () => `もっと近くに${getEmoji()}`,
+      () => `ナイショの話${getEmoji()}`,
+      () => `押し付けちゃう${getEmoji()}`,
+      () => `耳元でね…${getEmoji()}`,
+      () => `ずっと見てて${getEmoji()}`,
+      () => `とろけちゃう${getEmoji()}`,
+      () => `密着${getEmoji()}${getEmoji()}`,
+      () => `お願いがある${getEmoji()}`,
+      () => `今日だけ特別${getEmoji()}`,
+      () => `好きにしていい${getEmoji()}`,
+      () => `我慢できない${getEmoji()}`,
+      () => `くっつきたい${getEmoji()}`,
+      () => `甘えていい？${getEmoji()}`,
+      () => `見つめないで${getEmoji()}`,
+      () => `唇がほしい${getEmoji()}`,
+      () => `脱いじゃった${getEmoji()}🔞`,
+      () => `いけないコト${getEmoji()}`,
+      () => `ベッドの上で${getEmoji()}`,
+      () => `抱きしめて${getEmoji()}`,
+      () => `ねぇ、来て${getEmoji()}`,
+      () => `${rBody()}見せ${getEmoji()}`,
+      () => `限定ショット🔞`,
+      () => `溶けちゃいそう${getEmoji()}`,
+      () => `夜のご褒美${getEmoji()}`,
+      () => `お触りNG？${getEmoji()}`,
+      () => `妄想してみて${getEmoji()}`,
+      () => `ぴったりフィット${getEmoji()}`,
+      () => `汗ばんだ${getEmoji()}`,
+      () => `誰かあっためて${getEmoji()}`
+    ],
+    bodies: [
+      (s) => `今日の${getName()}${getEmoji()}\n\nちょっとだけ\n見せちゃう${pickRandom(s.suffix)}\n\n気になる人は\n会いに来て${getEmoji()}`,
+      (s) => `ねぇ…${getEmoji()}\n\n今日のわたし\nどう？${getEmoji()}\n\nいっぱい\n甘えさせて${pickRandom(s.suffix)}`,
+      (s) => `${rLingerie()}${getEmoji()}\n\n似合うかな…？${getEmoji()}\n\nドキドキ\nしちゃった${pickRandom(s.suffix)}`,
+      (s) => `ねぇ\nこっち向いて${getEmoji()}\n\n${getName()}のこと\nもっと知ってほしい${getEmoji()}\n\n会いに来てくれたら\nいいこと教えてあげる${pickRandom(s.suffix)}`,
+      (s) => `今日は\nちょっと大胆${getEmoji()}\n\n写真撮っちゃった${getEmoji()}\n\nこれ以上は\n会った人だけの\nヒミツ${pickRandom(s.suffix)}`,
+      (s) => `お風呂上がり${getEmoji()}\n\nいい匂いする${getEmoji()}\n\n湯気の中の\n${getName()}…\n\n想像してみて${pickRandom(s.suffix)}`,
+      (s) => `今日のコーデ${getEmoji()}\n\n胸元あいちゃってる\nかも…${getEmoji()}\n\n目のやり場に\n困っちゃう？${pickRandom(s.suffix)}`,
+      (s) => `くっつきたい\n気分${getEmoji()}\n\n今日来てくれたら\n離さないから${getEmoji()}\n\n覚悟してね${pickRandom(s.suffix)}`,
+      (s) => `ベッドの上で\n撮ったよ${getEmoji()}\n\nちょっとだけ\nセクシー？${getEmoji()}\n\n続きは会ってから${pickRandom(s.suffix)}`,
+      (s) => `${rBody()}のラインが\nきれいに撮れた${getEmoji()}\n\nこういうの\n好き？${getEmoji()}\n\n${getName()}の\n魅力伝わるかな${pickRandom(s.suffix)}`,
+      (s) => `鏡の前で\nパシャリ${getEmoji()}\n\n今日の${getName()}\nかわいくない？${getEmoji()}\n\n褒めてくれたら\nもっと見せちゃう${pickRandom(s.suffix)}`,
+      (s) => `ねぇ…\n秘密にしてね${getEmoji()}\n\nこんな写真\n撮っちゃった${getEmoji()}\n\nマイガール限定で\nもっとあるよ${pickRandom(s.suffix)}`,
+      (s) => `${rLingerie()}\n買っちゃった${getEmoji()}\n\nどっちが似合う？\n1. 黒\n2. 白${getEmoji()}\n\nコメントで\n教えてね${pickRandom(s.suffix)}`,
+      (s) => `${rAdj()}…${getEmoji()}\n\n今日の${getName()}\n自分でもびっくり\nするくらい\nいい感じ${getEmoji()}\n\n会いに来たら\nもっとすごいよ${pickRandom(s.suffix)}`,
+      (s) => `${timeGreets()}${getEmoji()}\n\nまだ眠いから\nベッドでゴロゴロ${getEmoji()}\n\nパジャマ姿\nちょっと見せちゃう${getEmoji()}\n\n起こしに来て${pickRandom(s.suffix)}`,
+      (s) => `汗かいちゃった${getEmoji()}\n\n今日暑くて\n薄着になっちゃった${getEmoji()}\n\n透けてない？\n大丈夫？${getEmoji()}\n\n…大丈夫じゃ\nないかも${pickRandom(s.suffix)}`,
+      (s) => `お気に入りの\nワンピース${getEmoji()}\n\n風が吹いたら\nやばいやつ${getEmoji()}\n\n今日来てくれたら\n近くで\n見れるよ${pickRandom(s.suffix)}`,
+      (s) => `ねぇねぇ${getEmoji()}\n\n${getName()}の\nここ${getEmoji()}\nどう思う？\n\n自信あるところ\nなんだけど${getEmoji()}\n\n褒めて${pickRandom(s.suffix)}`,
+      (s) => `寝起きの\nすっぴん${getEmoji()}\n\n見せていいかな${getEmoji()}\n\n意外と\n好きって言って\nくれる人\n多いの${pickRandom(s.suffix)}\n\nどう？${getEmoji()}`,
+      (s) => `さっき撮ったの${getEmoji()}\n\nちょっと攻めすぎ？${getEmoji()}\n\nでも${getName()}的には\nお気に入り${getEmoji()}\n\nもっと過激なのは\nマイガール限定で${pickRandom(s.suffix)}`,
+      (s) => `${getName()}の\n${rBody()}好き\nって言ってくれる人${getEmoji()}\n\n今日は特別に\nたくさん見せちゃう${getEmoji()}\n\n会いに来てね${pickRandom(s.suffix)}`,
+      (s) => `ボディクリーム\n塗りたて${getEmoji()}\n\nすべすべの\n${getName()}を\n触りに来て${getEmoji()}\n\nいい匂いも\nするよ${pickRandom(s.suffix)}`,
+      (s) => `今日のオフショット${getEmoji()}\n\nスタッフさんに\n「それ載せるの！？」\nって言われた${getEmoji()}\n\n載せちゃう${pickRandom(s.suffix)}\n\nだって見てほしいもん${getEmoji()}`,
+      (s) => `夜になると\n大胆になっちゃう${getEmoji()}\n\n昼間の${getName()}とは\n別人かも${getEmoji()}\n\nどっちが好き？${getEmoji()}\n\n確かめに来て${pickRandom(s.suffix)}`
+    ]
+  },
+  attend: {
+    titles: [
+      () => `今日会えるよ${getEmoji()}`,
+      () => `空き枠あり${getEmoji()}`,
+      () => `本日出勤${getEmoji()}`,
+      () => `会いに来て${getEmoji()}`,
+      () => `お誘いまってる${getEmoji()}`,
+      () => `出勤するよ${getEmoji()}`,
+      () => `予約受付中${getEmoji()}`,
+      () => `待ってるね${getEmoji()}`,
+      () => `まだ間に合う${getEmoji()}`,
+      () => `今から出勤${getEmoji()}`,
+      () => `🈳空き状況${getEmoji()}`,
+      () => `遊ぼ？${getEmoji()}`,
+      () => `${weekday}曜日出勤${getEmoji()}`,
+      () => `ご案内できます${getEmoji()}`,
+      () => `急いで${getEmoji()}あと少し`,
+      () => `スタンバイOK${getEmoji()}`,
+      () => `今週の予定${getEmoji()}`,
+      () => `明日も出勤${getEmoji()}`,
+      () => `向かってるよ${getEmoji()}`,
+      () => `準備できた${getEmoji()}`,
+      () => `ラスト1枠${getEmoji()}`,
+      () => `お暇ですか？${getEmoji()}`,
+      () => `今日も元気に${getEmoji()}`,
+      () => `飛び込みOK${getEmoji()}`,
+      () => `お仕事帰りに${getEmoji()}`,
+      () => `ご指名お待ち${getEmoji()}`,
+      () => `暇つぶしにおいで${getEmoji()}`,
+      () => `退屈でしょ？${getEmoji()}`,
+      () => `${weekday}曜の夜は${getEmoji()}`,
+      () => `次いつ出勤？${getEmoji()}`,
+      () => `お昼から出勤${getEmoji()}`,
+      () => `深夜も受付中${getEmoji()}`,
+      () => `残りわずか${getEmoji()}`,
+      () => `ぽっかり空いた${getEmoji()}`,
+      () => `早い者勝ち${getEmoji()}`
+    ],
+    bodies: [
+      (s) => `おはよう${getEmoji()}\n\n今日は出勤${pickRandom(s.suffix)}\n\nまだ空いてる時間\nあるから\n遊びに来て${getEmoji()}\n\n予約はお電話か\nネットからどうぞ${getEmoji()}`,
+      (s) => `出勤するよ${getEmoji()}\n\nまだ空き枠あるから\nチェックしてね${getEmoji()}\n\n${getName()}に\n会いに来て${pickRandom(s.suffix)}`,
+      (s) => `今日の出勤情報${getEmoji()}\n\nお電話でもネットでも\nご予約お待ちしてます${getEmoji()}\n\n${getName()}と\n楽しい時間\n過ごそう${pickRandom(s.suffix)}`,
+      (s) => `${weekday}曜日${getEmoji()}\n\n今日もお仕事\n頑張ってるあなたに\n会いたいな${getEmoji()}\n\nご褒美に来てね${pickRandom(s.suffix)}`,
+      (s) => `空き情報${getEmoji()}\n\nまだご案内できる\n時間あるよ${getEmoji()}\n\n迷ってるなら\n今がチャンス${pickRandom(s.suffix)}\n\nお気軽にお問い合わせ\nしてね${getEmoji()}`,
+      (s) => `出勤しました${getEmoji()}\n\nお店で準備\nバッチリ${getEmoji()}\n\nいつでも\nお誘いOK${pickRandom(s.suffix)}\n\n待ってるね${getEmoji()}`,
+      (s) => `今週のスケジュール${getEmoji()}\n\n出勤日は\nプロフィール\nチェックしてね${getEmoji()}\n\n早めの予約が\nおすすめ${pickRandom(s.suffix)}`,
+      (s) => `もうすぐ出勤${getEmoji()}\n\n今日はどんな人に\n会えるかな${getEmoji()}\n\nワクワク\nしてます${pickRandom(s.suffix)}\n\nお待ちしてるね${getEmoji()}`,
+      (s) => `${timeGreets()}${getEmoji()}\n\n今日の${getName()}\n出勤してるよ${getEmoji()}\n\nまだ空きあるから\nサクッと予約して${pickRandom(s.suffix)}\n\n初めての方も\n大歓迎${getEmoji()}`,
+      (s) => `ねぇねぇ${getEmoji()}\n\n今日暇でしょ？${getEmoji()}\n\n${getName()}に\n会いに来てよ${getEmoji()}\n\n楽しいこと\nいっぱいしよ${pickRandom(s.suffix)}`,
+      (s) => `お仕事お疲れ様${getEmoji()}\n\n帰りに寄ってかない？${getEmoji()}\n\n${getName()}が\n疲れ癒してあげる${pickRandom(s.suffix)}\n\n予約待ってるね${getEmoji()}`,
+      (s) => `ぽっかり空いちゃった${getEmoji()}\n\nキャンセル出たから\n急募${getEmoji()}\n\n今すぐ来れる人\nいないかな${pickRandom(s.suffix)}\n\nお得かもよ？${getEmoji()}`,
+      (s) => `ラスト1枠${getEmoji()}\n\n残り1つだけ\n空いてます${getEmoji()}\n\n迷ってる間に\n埋まっちゃうかも${pickRandom(s.suffix)}\n\nお早めにね${getEmoji()}`,
+      (s) => `明日の出勤予告${getEmoji()}\n\n明日も出勤するよ${getEmoji()}\n\n事前予約\n大歓迎${getEmoji()}\n\n前日予約で\n確実にGET${pickRandom(s.suffix)}`,
+      (s) => `深夜帯${getEmoji()}\n\nまだまだ\nご案内できます${getEmoji()}\n\n夜更かし組\nいらっしゃい${pickRandom(s.suffix)}\n\n${getName()}待ってるよ${getEmoji()}`,
+      (s) => `今日のコンディション\n最高${getEmoji()}\n\n気分いいから\n楽しめること\n間違いなし${getEmoji()}\n\nこういう日に\n会いに来て${pickRandom(s.suffix)}`
+    ]
+  },
+  thanks: {
+    titles: [
+      () => `ありがとう${getEmoji()}${getEmoji()}`,
+      () => `幸せな時間${getEmoji()}`,
+      () => `感謝${getEmoji()}`,
+      () => `楽しかった${getEmoji()}`,
+      () => `また会おうね${getEmoji()}`,
+      () => `今日もありがとう${getEmoji()}`,
+      () => `大好き${getEmoji()}みんな`,
+      () => `最高の1日${getEmoji()}`,
+      () => `お礼${getEmoji()}`,
+      () => `嬉しかった${getEmoji()}`,
+      () => `${getName()}より${getEmoji()}`,
+      () => `出会いに感謝${getEmoji()}`,
+      () => `ドキドキした${getEmoji()}`,
+      () => `笑顔にしてくれて${getEmoji()}`,
+      () => `ぎゅーってした${getEmoji()}`,
+      () => `夢みたい${getEmoji()}`,
+      () => `余韻に浸ってる${getEmoji()}`,
+      () => `会えてよかった${getEmoji()}`,
+      () => `最高の出会い${getEmoji()}`,
+      () => `みんなが宝物${getEmoji()}`,
+      () => `${getName()}は幸せ者${getEmoji()}`,
+      () => `涙出そう${getEmoji()}`,
+      () => `ずっと忘れない${getEmoji()}`,
+      () => `愛してる${getEmoji()}みんな`,
+      () => `本日○名様${getEmoji()}`,
+      () => `初めてさんへ${getEmoji()}`,
+      () => `常連さんへ${getEmoji()}`,
+      () => `次も楽しみ${getEmoji()}`,
+      () => `心がぽかぽか${getEmoji()}`,
+      () => `帰りの電車で${getEmoji()}`
+    ],
+    bodies: [
+      (s) => `今日来てくれた皆さん\nありがとう${getEmoji()}\n\nとっても楽しい時間\n過ごせました${getEmoji()}\n\nまた${getName()}に\n会いに来てね${pickRandom(s.suffix)}\n\n大好き${getEmoji()}`,
+      (s) => `今日もたくさんの\n出会いがあって\n幸せ${getEmoji()}\n\n来てくれた方\nひとりひとりに\n感謝${getEmoji()}\n\nまた会える日を\n楽しみにしてるね${pickRandom(s.suffix)}`,
+      (s) => `本日のお礼${getEmoji()}\n\n楽しすぎて\nあっという間だった${getEmoji()}\n\nみんな優しくて\n${getName()}\n嬉しかった${pickRandom(s.suffix)}\n\nまた来てね${getEmoji()}`,
+      (s) => `今日は\nありがとうございました${getEmoji()}\n\n初めましての方も\n常連さんも\nみんな大好き${getEmoji()}\n\nまた${getName()}に\n会いに来て${pickRandom(s.suffix)}`,
+      (s) => `退勤しました${getEmoji()}\n\n今日来てくれた方\n本当にありがとう${getEmoji()}\n\nめちゃくちゃ\n楽しかった${getEmoji()}\n\n次も楽しみに\nしててね${pickRandom(s.suffix)}`,
+      (s) => `今日の感想${getEmoji()}\n\nみんなのおかげで\n元気もらった${getEmoji()}\n\n${getName()}が頑張れるのは\n応援してくれる\nみんなのおかげ${pickRandom(s.suffix)}\n\nありがとう${getEmoji()}`,
+      (s) => `お礼日記${getEmoji()}\n\n今日は○○さん\n○○さん\n○○さん\n来てくれて\nありがとう${getEmoji()}\n\n※お名前は\nお礼に変えさせてね${getEmoji()}\n\n次回もよろしく${pickRandom(s.suffix)}`,
+      (s) => `幸せすぎた${getEmoji()}\n\n今日出会えた方\nほんとにありがとう${getEmoji()}\n\n${getName()}にとって\nかけがえのない\n時間だったよ${pickRandom(s.suffix)}`,
+      (s) => `初めましての方へ${getEmoji()}\n\n今日初めて\n来てくれた方\nありがとう${getEmoji()}\n\n緊張してた？\n${getName()}も実は\nドキドキしてた${pickRandom(s.suffix)}\n\nまた指名してね${getEmoji()}`,
+      (s) => `常連さんへ${getEmoji()}\n\nいつも来てくれて\n本当にありがとう${getEmoji()}\n\nあなたがいるから\n${getName()}は\n頑張れてます${getEmoji()}\n\nこれからも\nよろしくね${pickRandom(s.suffix)}`,
+      (s) => `今帰りの電車${getEmoji()}\n\n今日のこと\n思い出して\nニヤニヤしてる${getEmoji()}\n\n楽しかったなぁ${getEmoji()}\n\nまた会えるの\n楽しみにしてるね${pickRandom(s.suffix)}`,
+      (s) => `○○さん${getEmoji()}\n\nお菓子の差し入れ\nありがとう${getEmoji()}\n\n${rFood()}美味しかった${getEmoji()}\n\n気持ちが嬉しい${getEmoji()}\n\nまた来てね${pickRandom(s.suffix)}`,
+      (s) => `今日の反省点${getEmoji()}\n\n楽しすぎて\n時間足りなかった${getEmoji()}\n\nもっと長く\n一緒にいたかった${getEmoji()}\n\n次は長い時間で\n来てね${pickRandom(s.suffix)}`,
+      (s) => `写真見返してたら${getEmoji()}\n\n今日の写真\nめっちゃいい笑顔${getEmoji()}\n\nこれは\nみんなが楽しませて\nくれたおかげ${getEmoji()}\n\nありがとう${pickRandom(s.suffix)}`,
+      (s) => `帰ってきた${getEmoji()}\n\nお風呂入りながら\n今日のこと\n振り返り中${getEmoji()}\n\nひとりひとりとの\n時間が\n全部宝物${pickRandom(s.suffix)}\n\n大好き${getEmoji()}`,
+      (s) => `マイガール登録\nしてくれた方${getEmoji()}\n\n今日新しく\n登録してくれた人\nいてめちゃ嬉しい${getEmoji()}\n\n限定コンテンツ\n楽しんでね${pickRandom(s.suffix)}\n\nこれからも頑張る${getEmoji()}`
+    ]
+  },
+  daily: {
+    titles: [
+      () => `晩御飯${getEmoji()}`,
+      () => `${sTopic()}${getEmoji()}`,
+      () => `買い物した${getEmoji()}`,
+      () => `おやすみ${getEmoji()}`,
+      () => `最近ハマってる${getEmoji()}`,
+      () => `おはよう${getEmoji()}`,
+      () => `ランチ${getEmoji()}`,
+      () => `${rFood()}${getEmoji()}`,
+      () => `お散歩${getEmoji()}`,
+      () => `ネイル変えた${getEmoji()}`,
+      () => `寝落ちしてた${getEmoji()}`,
+      () => `シンデレラみた${getEmoji()}`,
+      () => `カフェなう${getEmoji()}`,
+      () => `${rHobby()}${getEmoji()}`,
+      () => `まったり${getEmoji()}`,
+      () => `今日のコーデ${getEmoji()}`,
+      () => `髪切った${getEmoji()}`,
+      () => `${weekday}曜日${getEmoji()}`,
+      () => `休みの過ごし方${getEmoji()}`,
+      () => `質問ある？${getEmoji()}`,
+      () => `みんなに聞きたい${getEmoji()}`,
+      () => `好きなもの${getEmoji()}`,
+      () => `月曜日スタート${getEmoji()}`,
+      () => `お腹すいた${getEmoji()}`,
+      () => `${rPlace()}行ってきた${getEmoji()}`,
+      () => `美容Day${getEmoji()}`,
+      () => `筋トレした${getEmoji()}`,
+      () => `ペット${getEmoji()}`,
+      () => `掃除してた${getEmoji()}`,
+      () => `天気いいね${getEmoji()}`,
+      () => `雨だ${getEmoji()}`,
+      () => `二度寝した${getEmoji()}`,
+      () => `新しく買った${getEmoji()}`,
+      () => `みんな元気？${getEmoji()}`,
+      () => `ひとりごと${getEmoji()}`,
+      () => `${rAdj()}${getEmoji()}`,
+      () => `ご飯作った${getEmoji()}`,
+      () => `ダイエット中${getEmoji()}`,
+      () => `髪色変えた${getEmoji()}`,
+      () => `お出かけ${getEmoji()}`
+    ],
+    bodies: [
+      (s) => `今日は\nお休みだったから${getEmoji()}\n\nのんびり\n過ごしてたよ${getEmoji()}\n\n次の出勤は\nチェックしてね${pickRandom(s.suffix)}`,
+      (s) => `${rFood()}食べたよ${getEmoji()}\n\nめちゃくちゃ\n美味しかった${getEmoji()}\n\nみんなは何食べた？${pickRandom(s.suffix)}`,
+      (s) => `今日は${rHobby()}\nしてた${getEmoji()}\n\nハマりすぎて\n時間忘れちゃう${getEmoji()}\n\n同じ趣味の人\nいるかな？${pickRandom(s.suffix)}`,
+      (s) => `おはよう${getEmoji()}\n\n${weekday}曜日だね${getEmoji()}\n\n今週も\nがんばろうね${getEmoji()}\n\n次の出勤は\nプロフ見てね${pickRandom(s.suffix)}`,
+      (s) => `今日のランチ${getEmoji()}\n\n${rFood()}にした${getEmoji()}\n\nこのお店\nすごく良かった${getEmoji()}\n\nおすすめあったら\n教えて${pickRandom(s.suffix)}`,
+      (s) => `おやすみなさい${getEmoji()}\n\n今日も1日\nおつかれさま${getEmoji()}\n\nゆっくり休んでね${getEmoji()}\n\n${getName()}も\nもう寝る${pickRandom(s.suffix)}`,
+      (s) => `ネイル変えたよ${getEmoji()}\n\n今回は\nちょっと冒険してみた${getEmoji()}\n\nどうかな？${getEmoji()}\n\n次会ったとき\n見てね${pickRandom(s.suffix)}`,
+      (s) => `${sTopic()}の季節${getEmoji()}\n\n毎年楽しみ\nなんだよね${getEmoji()}\n\nみんなは\n${sTopic()}した？${pickRandom(s.suffix)}`,
+      (s) => `シンデレラ\n見たよ${getEmoji()}\n\n昨日の放送\nやばくなかった？${getEmoji()}\n\n語りたい人\nいたら教えて${pickRandom(s.suffix)}`,
+      (s) => `寝落ちしてた${getEmoji()}\n\nいつの間にか\n朝になってた${getEmoji()}\n\n${getName()}の\nドジっ子エピソード${pickRandom(s.suffix)}`,
+      (s) => `みんなに質問${getEmoji()}\n\n${getName()}の\nどこが好き？${getEmoji()}\n\n恥ずかしいけど\n聞いてみたかった${pickRandom(s.suffix)}\n\nコメントで教えて${getEmoji()}`,
+      (s) => `休みの日の\n${getName()}${getEmoji()}\n\n${rHobby()}して\nのんびり${getEmoji()}\n\nたまにはこんな日も\nいいよね${pickRandom(s.suffix)}`,
+      (s) => `${rPlace()}に来た${getEmoji()}\n\nひとりで\nぶらぶら${getEmoji()}\n\nいい感じの\nもの見つけた${getEmoji()}\n\n何買ったかは\n今度教える${pickRandom(s.suffix)}`,
+      (s) => `今日のご飯\n自炊した${getEmoji()}\n\n${rFood()}作ってみた${getEmoji()}\n\n見た目はアレだけど\n味は最高${getEmoji()}\n\n料理上手に\nなりたいなぁ${pickRandom(s.suffix)}`,
+      (s) => `美容Day${getEmoji()}\n\nパックして\nトリートメントして\nネイルして${getEmoji()}\n\nピカピカの\n${getName()}に\n会いに来て${pickRandom(s.suffix)}`,
+      (s) => `お散歩してたら${getEmoji()}\n\n可愛いお店\n見つけた${getEmoji()}\n\n${rFood()}が\nめっちゃ美味しくて\nリピ確定${pickRandom(s.suffix)}\n\n今度行く人いる？${getEmoji()}`,
+      (s) => `最近${rHobby()}に\nハマってて${getEmoji()}\n\n夜更かし\nしちゃってる${getEmoji()}\n\n同じ趣味の人\nいたら語ろう${pickRandom(s.suffix)}\n\nコメント待ってる${getEmoji()}`,
+      (s) => `どっちがいい？${getEmoji()}\n\nA. ${rFood()}\nB. ${rFood()}\n\n今日のご飯\n迷い中${getEmoji()}\n\nみんな決めて${pickRandom(s.suffix)}`,
+      (s) => `髪色変えたよ${getEmoji()}\n\nイメチェン${getEmoji()}\n\n似合うかな？${getEmoji()}\n\n次会ったとき\nびっくりするかも${pickRandom(s.suffix)}\n\n楽しみにしてて${getEmoji()}`,
+      (s) => `雨の日って${getEmoji()}\n\nなんか\nしっとりした気分\nになるよね${getEmoji()}\n\n${getName()}は\n雨の音聞きながら\n${rHobby()}してる${pickRandom(s.suffix)}`,
+      (s) => `今日の${getName()}の\n1日${getEmoji()}\n\n朝: ${rHobby()}\n昼: ${rFood()}\n夜: ${rHobby()}${getEmoji()}\n\n充実してた${pickRandom(s.suffix)}\n\nみんなは？${getEmoji()}`,
+      (s) => `ストレッチ\n始めてみた${getEmoji()}\n\n体柔らかく\nなりたい${getEmoji()}\n\n柔軟性UPしたら\nいいこと\nあるかもね${pickRandom(s.suffix)}\n\nふふ${getEmoji()}`,
+      (s) => `${timeGreets()}${getEmoji()}\n\n今日は何の日\nだろうって\n調べたら${getEmoji()}\n\n面白い記念日\nだった${getEmoji()}\n\nどうでもいい\n情報でした${pickRandom(s.suffix)}`,
+      (s) => `コンビニの\n新作スイーツ${getEmoji()}\n\n見つけたら\n絶対買っちゃう${getEmoji()}\n\n今日は\n${rFood()}風の\nやつゲット${pickRandom(s.suffix)}\n\n甘いもの最高${getEmoji()}`
+    ]
+  },
+  soldout: {
+    titles: [
+      () => `完売御礼${getEmoji()}${getEmoji()}`,
+      () => `全枠埋まった🈵`,
+      () => `ありがとう${getEmoji()}完売`,
+      () => `大人気${getEmoji()}感謝`,
+      () => `本日も完売🙇‍♀${getEmoji()}`,
+      () => `満員御礼${getEmoji()}`,
+      () => `予約いっぱい${getEmoji()}`,
+      () => `嬉しい悲鳴${getEmoji()}`,
+      () => `信じられない${getEmoji()}`,
+      () => `またまた完売${getEmoji()}`,
+      () => `次回お早めに${getEmoji()}`,
+      () => `完売しちゃった${getEmoji()}`,
+      () => `売り切れごめん${getEmoji()}`,
+      () => `SOLD OUT${getEmoji()}`,
+      () => `受付終了${getEmoji()}`,
+      () => `埋まっちゃった${getEmoji()}`,
+      () => `キャンセル待ち${getEmoji()}`,
+      () => `涙の完売${getEmoji()}`,
+      () => `おかげさまで${getEmoji()}`,
+      () => `○連続完売${getEmoji()}`,
+      () => `自己ベスト更新${getEmoji()}`,
+      () => `感動してる${getEmoji()}`,
+      () => `夢みたい${getEmoji()}完売`
+    ],
+    bodies: [
+      (s) => `今日も完売${getEmoji()}\n\nありがとうございます${getEmoji()}\n\n${getName()}に\n会いに来てくれて\nほんとに嬉しい${getEmoji()}\n\n次の出勤も\nお早めに予約してね${pickRandom(s.suffix)}`,
+      (s) => `完売しました${getEmoji()}\n\nたくさんの\nお問い合わせ\nありがとう${getEmoji()}\n\nお断りした方\nごめんなさい${getEmoji()}\n\n次回はぜひ\n早めにご予約を${pickRandom(s.suffix)}`,
+      (s) => `うそ…${getEmoji()}\n\nまたまた完売${getEmoji()}\n\n${getName()}のこと\nこんなに求めて\nくれるなんて${getEmoji()}\n\n本当にありがとう${pickRandom(s.suffix)}\n\n次の出勤日は\nチェックしてね${getEmoji()}`,
+      (s) => `${getEmoji()}完売御礼${getEmoji()}\n\n今日も最高の\n1日でした${getEmoji()}\n\nお会いできなかった方\nまた次の機会に${getEmoji()}\n\nご予約はお早めに${pickRandom(s.suffix)}`,
+      (s) => `全枠ご予約\nいただきました${getEmoji()}\n\n嬉しすぎる${getEmoji()}\n\nいつも応援してくれる\nみんなのおかげ${getEmoji()}\n\n${getName()}がんばるね${pickRandom(s.suffix)}`,
+      (s) => `完売${getEmoji()}\n\n最近ほんとに\nありがたいことに\n予約いっぱい${getEmoji()}\n\n指名してくれる方\n増えて嬉しい${getEmoji()}\n\n本指名のお客様は\nお早めに${pickRandom(s.suffix)}`,
+      (s) => `退勤します${getEmoji()}\n\n今日も完売で\n終われました${getEmoji()}\n\n疲れたけど\n幸せ${getEmoji()}\n\n来てくれた皆さん\nありがとう${pickRandom(s.suffix)}`,
+      (s) => `今月○回目の完売${getEmoji()}\n\nみんなのおかげで\n${getName()}は\n幸せ者${getEmoji()}\n\nこれからも\nよろしくね${pickRandom(s.suffix)}`,
+      (s) => `ごめんなさい${getEmoji()}\n\n今日お問い合わせ\nくれたのに\nお断りした方${getEmoji()}\n\n本当に申し訳ない${getEmoji()}\n\n次はぜひ早めに\n予約してもらえたら\n確実です${pickRandom(s.suffix)}`,
+      (s) => `受付終了${getEmoji()}\n\n今日も\nたくさんの方に\n会えました${getEmoji()}\n\nおかげさまで\n連続完売中${getEmoji()}\n\nこの記録\n更新したい${pickRandom(s.suffix)}`,
+      (s) => `嬉しすぎて\n泣きそう${getEmoji()}\n\n始めた頃は\n空き枠だらけ\nだったのに${getEmoji()}\n\n今は完売できるように\nなりました${getEmoji()}\n\nみんなのおかげ${pickRandom(s.suffix)}`,
+      (s) => `完売後のひとりごと${getEmoji()}\n\n今日は○名の方に\nお会いできました${getEmoji()}\n\n1人1人との時間が\n本当に幸せ${getEmoji()}\n\nまた次も\n全力で\nお迎えするね${pickRandom(s.suffix)}`,
+      (s) => `キャンセル待ち\nの方へ${getEmoji()}\n\n今日は\nお待ちいただいたのに\n案内できず\nすみません${getEmoji()}\n\n次回出勤日に\n優先的に\nご案内しますね${pickRandom(s.suffix)}\n\nよろしくお願いします${getEmoji()}`,
+      (s) => `自己最速完売${getEmoji()}\n\n出勤前に\n全部埋まった${getEmoji()}\n\n信じられない${getEmoji()}\n\nこんなに\n求めてもらえて\n${getName()}は\n世界一幸せ${pickRandom(s.suffix)}`,
+      (s) => `SOLD OUT${getEmoji()}\n\n開始○時間で\n完売しました${getEmoji()}\n\n前日予約してくれた方\nありがとう${getEmoji()}\n\n当日だと\n取れないかも\nなので\nお早めに${pickRandom(s.suffix)}`
+    ]
+  },
+  video: {
+    titles: [
+      () => `▶️ちょっとだけ${getEmoji()}`,
+      () => `新しい動画${getEmoji()}`,
+      () => `▶️限定公開${getEmoji()}`,
+      () => `SNS更新した${getEmoji()}`,
+      () => `▶️見てほしい${getEmoji()}`,
+      () => `動く${getName()}${getEmoji()}`,
+      () => `▶️時間限定${getEmoji()}🔞`,
+      () => `TikTokあげた${getEmoji()}`,
+      () => `YouTube見て${getEmoji()}`,
+      () => `▶️マイガール限定${getEmoji()}`,
+      () => `フォローして${getEmoji()}`,
+      () => `配信中${getEmoji()}`,
+      () => `撮影してきた${getEmoji()}`,
+      () => `グラビア${getEmoji()}`,
+      () => `▶️セルフ撮影${getEmoji()}`,
+      () => `リール投稿${getEmoji()}`,
+      () => `▶️ノーカット版${getEmoji()}`,
+      () => `声出してます${getEmoji()}`,
+      () => `踊ってみた${getEmoji()}`,
+      () => `▶️裏側見せます${getEmoji()}`,
+      () => `ASMR${getEmoji()}`,
+      () => `インスタ映え${getEmoji()}`,
+      () => `▶️今だけ無料${getEmoji()}`,
+      () => `お宝映像${getEmoji()}`,
+      () => `▶️リクエスト募集${getEmoji()}`
+    ],
+    bodies: [
+      (s) => `動画あげたよ${getEmoji()}\n\n見てくれた？${getEmoji()}\n\nマイガール登録で\n限定動画も見れるから\nチェックしてね${pickRandom(s.suffix)}`,
+      (s) => `SNS更新したよ${getEmoji()}\n\nフォローしてくれたら\n嬉しいな${getEmoji()}\n\n${profile.sns ? profile.sns : 'プロフィールから見てね'}${getEmoji()}`,
+      (s) => `新しい動画\n撮ったよ${getEmoji()}\n\nマイガール限定で\n公開してるから\n登録してね${getEmoji()}\n\nめちゃくちゃ\n頑張った${pickRandom(s.suffix)}`,
+      (s) => `▶️動く${getName()}${getEmoji()}\n\n写真じゃ伝わらない\n${getName()}の魅力${getEmoji()}\n\n動画で\n確認してね${pickRandom(s.suffix)}`,
+      (s) => `TikTokに\n新しいの\nあげたよ${getEmoji()}\n\n見てくれたら\n嬉しい${getEmoji()}\n\nいいね\nしてくれたら\nもっと嬉しい${pickRandom(s.suffix)}`,
+      (s) => `撮影してきた${getEmoji()}\n\nプロに撮って\nもらったよ${getEmoji()}\n\n仕上がり楽しみ${getEmoji()}\n\n公開したら\n見てね${pickRandom(s.suffix)}`,
+      (s) => `限定動画${getEmoji()}\n\n今日だけ特別に\n公開するね${getEmoji()}\n\nマイガール登録\nしてくれてる人だけの\n特典${pickRandom(s.suffix)}\n\nまだの人は急いで${getEmoji()}`,
+      (s) => `YouTube出ました${getEmoji()}\n\n${getName()}の\n意外な一面\n見れるかも${getEmoji()}\n\nチャンネル登録\nしてくれたら\n嬉しいな${pickRandom(s.suffix)}`,
+      (s) => `セルフ撮影\nしてみた${getEmoji()}\n\n自分で撮ると\nちょっと恥ずかしい${getEmoji()}\n\nでもいい感じに\n撮れたから\n見てほしい${pickRandom(s.suffix)}`,
+      (s) => `リクエスト\n募集中${getEmoji()}\n\n次の動画\n何撮ろうかな${getEmoji()}\n\nこんなの見たい\nってのがあったら\nコメントで\n教えて${pickRandom(s.suffix)}`,
+      (s) => `ASMR撮ったよ${getEmoji()}\n\n${getName()}の\nささやき声${getEmoji()}\n\n寝る前に\n聴いてね${getEmoji()}\n\nマイガールで\n聴けるよ${pickRandom(s.suffix)}`,
+      (s) => `メイク動画\nあげたよ${getEmoji()}\n\n出勤前の\n${getName()}の\nメイク過程${getEmoji()}\n\nすっぴんから\nばっちりメイクまで${pickRandom(s.suffix)}\n\n見てね${getEmoji()}`,
+      (s) => `コスプレ撮影会${getEmoji()}\n\n今日は○○の\nコスプレしてみた${getEmoji()}\n\n似合ってるかな？${getEmoji()}\n\n他にもリクエスト\nあったら教えて${pickRandom(s.suffix)}`,
+      (s) => `インスタ更新${getEmoji()}\n\n映えスポットで\n撮ってきた${getEmoji()}\n\n${getName()}の\n私服コーデ${getEmoji()}\n\nフォローまだの人は\nぜひ${pickRandom(s.suffix)}\n\n${profile.sns ? profile.sns : 'プロフから飛べるよ'}${getEmoji()}`,
+      (s) => `踊ってみた${getEmoji()}\n\n流行りの振り付け\n覚えたよ${getEmoji()}\n\nちょっとだけ\nセクシーに\nアレンジしてみた${pickRandom(s.suffix)}\n\n感想聞かせて${getEmoji()}`,
+      (s) => `お宝動画${getEmoji()}\n\n期間限定で\n無料公開するね${getEmoji()}\n\n普段は\nマイガール限定\nなのに${getEmoji()}\n\n太っ腹でしょ${pickRandom(s.suffix)}\n\n今のうちに見て${getEmoji()}`
+    ]
+  }
+};
+
+function generateSingle() {
+  const cat = selectedCat;
+  const t = templates[cat];
+  const s = getStyle();
+  const title = pickRandom(t.titles)();
+  const body = pickRandom(t.bodies)(s);
+  const extra = document.getElementById('extraInfo').value;
+  const vis = document.getElementById('visibility').value;
+
+  let finalBody = body;
+
+  // お礼日記の場合、お礼相手テキストを差し込む
+  if (cat === 'thanks') {
+    const thanksData = getThanksData();
+    const thanksStyle = document.getElementById('thanksStyle').value;
+    const thanksText = buildThanksText(thanksData, thanksStyle);
+    if (thanksText) {
+      // 本文中の「○○さん」部分を実名に置換、またはお礼テキストを追加
+      finalBody += thanksText;
+    }
+  }
+
+  if (extra) {
+    finalBody += `\n\n${extra}`;
+  }
+
+  const output = document.getElementById('singleOutput');
+  output.classList.remove('hidden');
+  output.innerHTML = renderCard(1, title, finalBody, cat, vis === 'limited', '');
+}
+
+// ---- カテゴリ本数管理 ----
+const catCounts = { sexy: 3, attend: 2, thanks: 1, daily: 2, soldout: 1, video: 1 };
+const catLabels = { sexy: 'セクシー系', attend: '出勤告知', thanks: 'お礼日記', daily: '日常系', soldout: '完売アピール', video: '動画/SNS' };
+const catLimited = { sexy: [false,true], attend: [false], thanks: [false], daily: [false], soldout: [false], video: [true,false] };
+
+function updateBatchTotal() {
+  const total = Object.values(catCounts).reduce((a,b) => a+b, 0);
+  document.getElementById('batchTotal').textContent = total;
+  // お礼日記が1以上ならお礼相手入力を表示
+  const bts = document.getElementById('batchThanksSection');
+  if (catCounts.thanks > 0) { bts.classList.remove('hidden'); } else { bts.classList.add('hidden'); }
+}
+
+function adjustCat(cat, delta) {
+  const newVal = catCounts[cat] + delta;
+  if (newVal < 0) return;
+  catCounts[cat] = newVal;
+  document.getElementById('cnt_' + cat).textContent = newVal;
+  updateBatchTotal();
+}
+
+function applyPreset(type) {
+  if (type === 'work') {
+    Object.assign(catCounts, { sexy: 3, attend: 2, thanks: 1, daily: 2, soldout: 1, video: 1 });
+  } else {
+    Object.assign(catCounts, { sexy: 1, attend: 0, thanks: 0, daily: 3, soldout: 0, video: 1 });
+  }
+  Object.keys(catCounts).forEach(k => { document.getElementById('cnt_' + k).textContent = catCounts[k]; });
+  updateBatchTotal();
+}
+
+// 一括生成用お礼相手の追加
+function addBatchThanksRow() {
+  const container = document.getElementById('batchThanksNames');
+  const row = document.createElement('div');
+  row.className = 'batch-thanks-row';
+  row.style.cssText = 'display:flex;gap:6px;margin-bottom:8px;align-items:center;';
+  row.innerHTML = '<input type="text" class="batch-thanks-name" placeholder="お名前" style="flex:1;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;">'
+    + '<input type="text" class="batch-thanks-memo" placeholder="ひとことメモ（任意）" style="flex:1;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;">'
+    + '<button onclick="this.parentElement.remove()" style="background:none;border:none;color:#e74c8c;font-size:18px;cursor:pointer;padding:0 4px;">×</button>';
+  container.appendChild(row);
+}
+
+function getBatchThanksData() {
+  const rows = document.querySelectorAll('.batch-thanks-row');
+  const data = [];
+  rows.forEach(row => {
+    const name = row.querySelector('.batch-thanks-name').value.trim();
+    const memo = row.querySelector('.batch-thanks-memo').value.trim();
+    if (name) data.push({ name, memo });
+  });
+  return data;
+}
+
+// 推奨時間帯マッピング
+const timeSlots = ['8:00-10:00','10:00-12:00','12:00-14:00','14:00-16:00','16:00-18:00','18:00-19:00','19:00-20:00','20:00-22:00','22:00-24:00','0:00-2:00','2:00-4:00','4:00-6:00'];
+const catTimeOrder = ['daily','attend','sexy','attend','video','sexy','attend','thanks','soldout','daily','daily','daily'];
+
+function generateBatch() {
+  const workTime = document.getElementById('workTime').value;
+  const note = document.getElementById('batchNote').value;
+  const s = getStyle();
+
+  // カテゴリ本数から投稿リストを構築
+  const posts = [];
+  const counts = {...catCounts};
+  // 時間帯順にカテゴリを割り当て
+  for (let i = 0; i < timeSlots.length && Object.values(counts).some(v => v > 0); i++) {
+    const preferredCat = catTimeOrder[i % catTimeOrder.length];
+    let cat = null;
+    if (counts[preferredCat] > 0) {
+      cat = preferredCat;
+    } else {
+      // 優先カテゴリの在庫がなければ残りから探す
+      cat = Object.keys(counts).find(k => counts[k] > 0);
+    }
+    if (!cat) break;
+    const limitedOptions = catLimited[cat] || [false];
+    const limited = limitedOptions[posts.filter(p => p.cat === cat).length % limitedOptions.length];
+    posts.push({ time: timeSlots[i], cat, label: catLabels[cat], limited });
+    counts[cat]--;
+    // まだ残りがあればもう一周回す
+    if (i === timeSlots.length - 1 && Object.values(counts).some(v => v > 0)) i = -1;
+  }
+
+  // お礼日記のお礼相手データ取得
+  const batchThanksData = getBatchThanksData();
+  const batchThanksStyle = document.getElementById('batchThanksStyle') ? document.getElementById('batchThanksStyle').value : 'list';
+
+  const total = posts.length;
+  let html = `<div style="text-align:center;font-weight:700;color:#c751c0;margin-bottom:12px;">テンプレート（${total}本）</div>`;
+
+  posts.forEach((slot, i) => {
+    const t = templates[slot.cat];
+    const title = pickRandom(t.titles)();
+    let body = pickRandom(t.bodies)(s);
+    if (note && i === 0) body += `\n\n${note}`;
+    if (workTime && slot.cat === 'attend') body = body.replace('出勤', `${workTime}出勤`);
+    // お礼日記の場合、お礼相手を差し込む
+    if (slot.cat === 'thanks' && batchThanksData.length > 0) {
+      body += buildThanksText(batchThanksData, batchThanksStyle);
+    }
+
+    html += renderCard(i + 1, title, body, slot.label, slot.limited, slot.time);
+  });
+
+  const output = document.getElementById('batchOutput');
+  output.classList.remove('hidden');
+  output.innerHTML = html;
+}
+
+function renderCard(num, title, body, category, isLimited, time) {
+  return `
+    <div class="output-card">
+      <div class="card-header">
+        <span class="card-num">#${num}</span>
+        ${time ? `<span class="card-time">${time}</span>` : ''}
+        <span class="card-category">${category}</span>
+        <span class="badge ${isLimited ? 'badge-limited' : 'badge-public'}">${isLimited ? '限定' : '公開'}</span>
+      </div>
+      <div class="card-title">${title}</div>
+      <div class="card-body">${body}</div>
+      <div class="card-meta">
+        <button class="copy-btn" onclick="copyText(this)">タイトルコピー</button>
+        <button class="copy-btn" onclick="copyBody(this)">本文コピー</button>
+      </div>
+    </div>
+  `;
+}
+
+function copyText(btn) {
+  const card = btn.closest('.output-card');
+  const title = card.querySelector('.card-title').textContent;
+  navigator.clipboard.writeText(title).then(() => {
+    btn.textContent = 'コピー済み！';
+    setTimeout(() => btn.textContent = 'タイトルコピー', 1500);
+  });
+}
+
+function copyBody(btn) {
+  const card = btn.closest('.output-card');
+  const body = card.querySelector('.card-body').textContent;
+  navigator.clipboard.writeText(body).then(() => {
+    btn.textContent = 'コピー済み！';
+    setTimeout(() => btn.textContent = '本文コピー', 1500);
+  });
+}
+</script>
+</body>
+</html>

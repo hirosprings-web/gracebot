@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>写メ日記BOT</title>
+<title>ウルグレBOT</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; color: #333; }
@@ -12,7 +12,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-ser
 .header h1 { font-size: 22px; margin-bottom: 4px; }
 .header p { font-size: 12px; opacity: 0.9; }
 .tabs { display: flex; background: #f8f8f8; border-bottom: 1px solid #eee; }
-.tab { flex: 1; padding: 12px; text-align: center; font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; }
+.tab { flex: 1; padding: 12px 4px; text-align: center; font-size: 11px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; white-space: nowrap; }
 .tab.active { color: #c751c0; border-bottom-color: #c751c0; background: #fff; }
 .content { padding: 16px; display: none; }
 .content.active { display: block; }
@@ -65,7 +65,7 @@ textarea { resize: vertical; min-height: 60px; }
 <body>
 <div class="app">
   <div class="header">
-    <h1>写メ日記BOT</h1>
+    <h1>ウルグレBOT</h1>
     <p>ランキング上位分析に基づく日記自動生成</p>
   </div>
 
@@ -74,6 +74,7 @@ textarea { resize: vertical; min-height: 60px; }
     <div class="tab" data-tab="single">1本生成</div>
     <div class="tab" data-tab="batch">1日分生成</div>
     <div class="tab" data-tab="tips">攻略法</div>
+    <div class="tab" data-tab="okini">オキニトーク</div>
   </div>
 
   <!-- 初期設定 -->
@@ -88,24 +89,7 @@ textarea { resize: vertical; min-height: 60px; }
         <label>年齢</label>
         <input type="number" id="castAge" placeholder="例: 23">
       </div>
-      <div class="input-group">
-        <label>在籍店名</label>
-        <input type="text" id="shopName" placeholder="例: GINGIRA☆TOKYO">
-      </div>
-      <div class="input-group">
-        <label>エリア</label>
-        <select id="area">
-          <option value="新宿">新宿・歌舞伎町</option>
-          <option value="池袋">池袋</option>
-          <option value="渋谷">渋谷</option>
-          <option value="五反田">五反田・品川</option>
-          <option value="鶯谷">鶯谷・上野</option>
-          <option value="錦糸町">錦糸町</option>
-          <option value="新橋">新橋・銀座</option>
-          <option value="吉原">吉原</option>
-          <option value="その他">その他</option>
-        </select>
-      </div>
+      <!-- 在籍店名・エリアは削除（ウルグレ固定） -->
       <div class="input-group">
         <label>得意プレイ・売りポイント</label>
         <input type="text" id="specialty" placeholder="例: 甘えイチャイチャ、密着">
@@ -364,6 +348,106 @@ textarea { resize: vertical; min-height: 60px; }
       </div>
     </div>
   </div>
+
+  <!-- オキニトーク返信BOT -->
+  <div class="content" id="okini">
+    <div class="tip-box" style="margin-bottom:16px;">
+      <div class="tip-title">秘密の成約5原則</div>
+      <div class="tip-text" style="font-size:12px;line-height:1.7;color:#555;">
+        <b>1. 短文化</b> 1〜2行の温かいレスで返信ハードルを下げる<br>
+        <b>2. ミラーリング</b> 客の言葉をそのまま返して共感を示す<br>
+        <b>3. 感情的理由づけ</b> 「早く会いたいから」等、感情で誘導<br>
+        <b>4. 先回り情報</b> ホテル・OP情報を聞かれる前に提示<br>
+        <b>5. 選択肢の限定</b> 「A日とB日どっち？」で決断を促す
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">メッセージ種類</div>
+      <div class="category-btns">
+        <div class="cat-btn selected" data-okini="first" onclick="selectOkini(this)">初回メッセージ</div>
+        <div class="cat-btn" data-okini="reply" onclick="selectOkini(this)">返信テンプレ</div>
+        <div class="cat-btn" data-okini="broadcast" onclick="selectOkini(this)">一斉送信</div>
+      </div>
+    </div>
+
+    <!-- 初回メッセージ設定 -->
+    <div id="okiniFirstSection">
+      <div class="section">
+        <div class="section-title">初回メッセージスタイル</div>
+        <div class="category-btns">
+          <div class="cat-btn selected" data-fstyle="auto" onclick="selectFirstStyle(this)">キャラ連動</div>
+          <div class="cat-btn" data-fstyle="ero" onclick="selectFirstStyle(this)">エロ直球</div>
+          <div class="cat-btn" data-fstyle="heal" onclick="selectFirstStyle(this)">癒し系</div>
+          <div class="cat-btn" data-fstyle="cute" onclick="selectFirstStyle(this)">甘え系</div>
+          <div class="cat-btn" data-fstyle="idol" onclick="selectFirstStyle(this)">推し活系</div>
+        </div>
+      </div>
+      <div class="tip-box" style="margin-bottom:12px;">
+        <div class="tip-title">初回メッセージとは</div>
+        <div class="tip-text">マイガール登録してくれたユーザーに自動送信される最初のメッセージ。返信率を左右する最重要テキストです。「キャラ連動」は初期設定のキャラ戦略に合わせて自動選択します。</div>
+      </div>
+      <button class="btn btn-primary" onclick="generateOkiniFirst()">初回メッセージを生成</button>
+      <div id="okiniFirstOutput" style="margin-top:16px;"></div>
+    </div>
+
+    <!-- 返信テンプレ設定 -->
+    <div id="okiniReplySection" class="hidden">
+      <div class="section">
+        <div class="section-title">返信シーン</div>
+        <div class="category-btns">
+          <div class="cat-btn selected" data-rscene="interest" onclick="selectReplyScene(this)">好み共感</div>
+          <div class="cat-btn" data-rscene="question" onclick="selectReplyScene(this)">質問返し</div>
+          <div class="cat-btn" data-rscene="diary" onclick="selectReplyScene(this)">日記/SNS話題</div>
+          <div class="cat-btn" data-rscene="schedule" onclick="selectReplyScene(this)">スケジュール</div>
+          <div class="cat-btn" data-rscene="booking" onclick="selectReplyScene(this)">予約サポート</div>
+          <div class="cat-btn" data-rscene="thanks" onclick="selectReplyScene(this)">予約お礼</div>
+          <div class="cat-btn" data-rscene="casual" onclick="selectReplyScene(this)">雑談</div>
+        </div>
+      </div>
+      <div class="input-group">
+        <label>相手の名前（任意）</label>
+        <input type="text" id="okiniReplyName" placeholder="ヘブンネーム等">
+      </div>
+      <div class="input-group">
+        <label>相手のメッセージ内容メモ（任意）</label>
+        <textarea id="okiniReplyContext" rows="2" placeholder="例: 写メ日記の動画が好きと言ってた、金曜に来たいらしい等"></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="generateOkiniReply()">返信テンプレを生成</button>
+      <div id="okiniReplyOutput" style="margin-top:16px;"></div>
+    </div>
+
+    <!-- 一斉送信設定 -->
+    <div id="okiniBroadcastSection" class="hidden">
+      <div class="section">
+        <div class="section-title">一斉送信タイプ</div>
+        <div class="category-btns">
+          <div class="cat-btn selected" data-btype="monthly" onclick="selectBroadcast(this)">月次挨拶</div>
+          <div class="cat-btn" data-btype="event" onclick="selectBroadcast(this)">イベント告知</div>
+          <div class="cat-btn" data-btype="season" onclick="selectBroadcast(this)">季節の挨拶</div>
+          <div class="cat-btn" data-btype="newservice" onclick="selectBroadcast(this)">新サービス</div>
+        </div>
+      </div>
+      <div class="input-group">
+        <label>イベント・サービス内容（任意）</label>
+        <textarea id="okiniBroadcastNote" rows="2" placeholder="例: 3/16-18イベント5000円引き、新コース「潮吹きコース」追加等"></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="generateOkiniBroadcast()">一斉送信文を生成</button>
+      <div id="okiniBroadcastOutput" style="margin-top:16px;"></div>
+    </div>
+
+    <div class="tip-box" style="margin-top:20px;">
+      <div class="tip-title">オキニトーク成約のコツ</div>
+      <div class="tip-text">
+        1. 初回メッセージは「質問」で終わると返信率UP<br>
+        2. 返信は短く温かく（長文は逆効果）<br>
+        3. 相手の名前を呼ぶと親密感UP<br>
+        4. 写メ日記・SNSの話題で自然に会話を継続<br>
+        5. スケジュールは客が聞いてきたら即回答<br>
+        6. ホテル情報を先出しすると予約の壁が下がる<br>
+        7. 月1回のフォローアップで休眠客を掘り起こし
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -519,8 +603,8 @@ function saveProfile() {
   profile = {
     name: document.getElementById('castName').value,
     age: document.getElementById('castAge').value,
-    shop: document.getElementById('shopName').value,
-    area: document.getElementById('area').value,
+    shop: 'ウルグレ',
+    area: '新宿',
     specialty: document.getElementById('specialty').value,
     chara: selectedChara,
     emojis: document.getElementById('emojis').value,
@@ -536,8 +620,6 @@ function saveProfile() {
 if (profile.name) {
   document.getElementById('castName').value = profile.name || '';
   document.getElementById('castAge').value = profile.age || '';
-  document.getElementById('shopName').value = profile.shop || '';
-  document.getElementById('area').value = profile.area || '新宿';
   document.getElementById('specialty').value = profile.specialty || '';
   document.getElementById('emojis').value = profile.emojis || '';
   document.getElementById('ngWords').value = profile.ngWords || '';
@@ -1115,6 +1197,270 @@ function copyBody(btn) {
   navigator.clipboard.writeText(body).then(() => {
     btn.textContent = 'コピー済み！';
     setTimeout(() => btn.textContent = '本文コピー', 1500);
+  });
+}
+
+// ===== オキニトークBOT =====
+let selectedOkiniType = 'first';
+let selectedFirstStyle = 'auto';
+let selectedReplyScene = 'interest';
+let selectedBroadcastType = 'monthly';
+
+function selectOkini(el) {
+  document.querySelectorAll('[data-okini]').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedOkiniType = el.dataset.okini;
+  document.getElementById('okiniFirstSection').classList.toggle('hidden', selectedOkiniType !== 'first');
+  document.getElementById('okiniReplySection').classList.toggle('hidden', selectedOkiniType !== 'reply');
+  document.getElementById('okiniBroadcastSection').classList.toggle('hidden', selectedOkiniType !== 'broadcast');
+}
+function selectFirstStyle(el) {
+  document.querySelectorAll('[data-fstyle]').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedFirstStyle = el.dataset.fstyle;
+}
+function selectReplyScene(el) {
+  document.querySelectorAll('[data-rscene]').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedReplyScene = el.dataset.rscene;
+}
+function selectBroadcast(el) {
+  document.querySelectorAll('[data-btype]').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedBroadcastType = el.dataset.btype;
+}
+
+// 初回メッセージテンプレート
+const okiniFirstTemplates = {
+  ero: [
+    s => `はじめまして${s.name}です${s.emoji}\nマイガール登録ありがとう${s.emoji}\n嬉しすぎてメッセージしちゃいました${s.emoji}\nどんなエッチが好きですか⁉️${s.emoji}`,
+    s => `はじめまして${s.emoji}${s.name}です${s.emoji}\nマイガール登録ありがとっ${s.emoji}\n${s.name}はエッチな事が大好きで責められるとすぐにいっちゃいます${s.emoji}\nイチャイチャも大好きなのでたくさんくっついてラブラブしよーね${s.emoji}`,
+    s => `はじめまして${s.name}だよ${s.emoji}\nマイガール嬉しい${s.emoji}\n${s.name}ね、甘えん坊だから一緒にいるとすぐくっつきたくなっちゃうの${s.emoji}\nどんな風に楽しみたいか教えてね${s.emoji}`,
+    s => `${s.name}です${s.emoji}マイガールありがとう${s.emoji}\nプロフ見てくれたのかな？${s.emoji}\n実は${s.name}…感度がすごくて触られただけでトロトロになっちゃうの${s.emoji}\n一緒にドキドキしたいな${s.emoji}`,
+    s => `初めまして${s.name}です${s.emoji}\nマイガール登録ありがとうございます${s.emoji}\n${s.name}はキスとイチャイチャが大好き${s.emoji}\n密着してラブラブな時間を過ごしたいな${s.emoji}\nお兄さんの好きなこと教えてね${s.emoji}`
+  ],
+  heal: [
+    // 成約原則: バーナム効果（誰にでも当てはまる癒し）＋返報性（全力ぎゅー）＋低認知負荷（短文）
+    s => `マイガール登録ありがとうございます${s.emoji}\n${s.name}です${s.emoji}\n心と心が繋がるあったかい時間を一緒に過ごせたらうれしいなっ${s.emoji}\nちょっぴり疲れたお兄さん、${s.name}が全力でぎゅーするからね！\nお返事待ってるね${s.emoji}`,
+    // 成約原則: 短文＋温かさ＋ハードル下げ（お話からでOK）
+    s => `マイガール登録ありがとう${s.emoji}\n${s.name}です${s.emoji}\nお仕事お疲れ様${s.emoji}\nまずはお話からでいいので気軽にメッセージしてね${s.emoji}`,
+    // 成約原則: 関係構築を急がない姿勢→安心感（初頭効果で好印象）
+    s => `はじめまして${s.emoji}${s.name}です${s.emoji}\nマイガール嬉しいな${s.emoji}\nゆっくり仲良くなれたらいいね${s.emoji}\nいつでもお話しようね${s.emoji}`,
+    // 成約原則: 短文＋バーナム効果（元気にしたい）＋質問で返信促進
+    s => `${s.name}です${s.emoji}マイガールありがとう${s.emoji}\n笑顔にさせるの得意だから${s.emoji}\nどんなお話でもいいから聞かせてね${s.emoji}`,
+    // 成約原則: 控えめアプローチ→安心感＋自然な関係構築
+    s => `マイガール登録してくれてありがとう${s.emoji}\n${s.name}です${s.emoji}\nもし少しでも気になってくれたなら嬉しいな${s.emoji}\nゆっくり仲良くなろうね${s.emoji}`
+  ],
+  cute: [
+    s => `マイガール登録ありがとう${s.emoji}\n${s.name}だよっ${s.emoji}\nめっちゃ嬉しい${s.emoji}\n${s.name}のこと気になってくれた？${s.emoji}\nたくさん甘えさせてね${s.emoji}\n会えるの楽しみにしてるっ${s.emoji}`,
+    s => `はじめまして${s.emoji}${s.name}だよ${s.emoji}\nマイガールありがと${s.emoji}\n${s.name}ね、甘えるの大好きなの${s.emoji}\n「かわいい」って言ってくれる人にはもっと甘えちゃう${s.emoji}\nどんなお兄さんか気になるな${s.emoji}`,
+    s => `${s.name}です${s.emoji}\nマイガール登録嬉しい${s.emoji}\nぎゅーってされるのが大好き${s.emoji}\n一緒にいたらいっぱいくっつくけど大丈夫？${s.emoji}\nお返事待ってるね${s.emoji}`,
+    s => `わーいマイガールありがとう${s.emoji}\n${s.name}だよ${s.emoji}\n嬉しくてテンション上がっちゃった${s.emoji}\nどんな時間を一緒に過ごしたいか教えてくれたら${s.name}頑張っちゃうよ${s.emoji}`,
+    s => `マイガール嬉しいっ${s.emoji}${s.name}です${s.emoji}\n写メ日記見てくれたのかな？${s.emoji}\nもっとたくさん${s.name}のこと知ってほしいなっ${s.emoji}\nメッセージ待ってるね${s.emoji}`
+  ],
+  idol: [
+    s => `マイガール登録ありがとう${s.emoji}\n${s.name}です${s.emoji}\n応援してくれるの？${s.emoji}嬉しすぎる${s.emoji}\n${s.name}のこと推してくれたら、もっともっと頑張れるよ${s.emoji}\nこれからよろしくね${s.emoji}`,
+    s => `はじめまして${s.emoji}${s.name}です${s.emoji}\nマイガール＝推し登録ってことでいいよね？${s.emoji}\n全力で推されたい${s.name}をよろしくっ${s.emoji}\n写メ日記もたくさん見てね${s.emoji}`,
+    s => `${s.name}だよ${s.emoji}\nマイガールありがとう${s.emoji}\n推してくれてる人のためにもっと可愛くなるからね${s.emoji}\n一緒に楽しい時間つくろうね${s.emoji}\nDMいつでもウェルカム${s.emoji}`,
+    s => `マイガール嬉しい${s.emoji}${s.name}です${s.emoji}\n新しい推しさんだ${s.emoji}\n${s.name}のこと世界一かわいいって思ってくれたら嬉しいな${s.emoji}\n写メ日記と動画チェックしてね${s.emoji}`,
+    s => `${s.name}です${s.emoji}マイガールありがとう${s.emoji}\nSNSも見てくれたら嬉しいな${s.emoji}\nいいね押してくれると${s.name}が喜びます${s.emoji}\nまずは推しからスタートしよ${s.emoji}`
+  ]
+};
+
+// キャラ連動マッピング
+const charaToFirstStyle = {
+  koakuma: 'cute', shitashimi: 'heal', charisma: 'ero',
+  kageki: 'ero', seiso: 'heal', idol: 'idol'
+};
+
+function getOkiniStyle() {
+  if (selectedFirstStyle === 'auto') {
+    return charaToFirstStyle[selectedChara] || 'heal';
+  }
+  return selectedFirstStyle;
+}
+
+function generateOkiniFirst() {
+  const s = getProfileForGen();
+  if (!s.name) { alert('初期設定でお名前を入力してください'); return; }
+  const style = getOkiniStyle();
+  const templates = okiniFirstTemplates[style];
+  let html = '<div style="text-align:center;font-weight:700;color:#c751c0;margin-bottom:12px;">初回メッセージ候補（3パターン）</div>';
+  const used = new Set();
+  for (let i = 0; i < 3; i++) {
+    let idx;
+    do { idx = Math.floor(Math.random() * templates.length); } while (used.has(idx) && used.size < templates.length);
+    used.add(idx);
+    const msg = templates[idx](s);
+    html += renderOkiniCard(i + 1, msg, `初回/${style}`);
+  }
+  document.getElementById('okiniFirstOutput').innerHTML = html;
+}
+
+// 返信テンプレート
+const okiniReplyTemplates = {
+  interest: [
+    // 成約原則: ミラーリング（客の好みをそのまま返す）＋短文で温かさ
+    (s,n,c) => `${n ? n+'くん' : ''}${s.emoji}\nメッセージありがとう${s.emoji}\n${c ? c+'好きなんだね！' : '好みが合いそう！'}${s.emoji}\n${s.name}も大好き${s.emoji}\nたくさんお話しようね${s.emoji}`,
+    // 成約原則: 短い肯定＋ミラーリング→信頼構築
+    (s,n,c) => `うん！${s.emoji}\n${n ? n+'さんと' : ''}相性良さそう${s.emoji}\n${s.name}もそういうの好き${s.emoji}`,
+    // 成約原則: 感情的同調＋質問で深堀り（単純接触を増やす）
+    (s,n,c) => `わぁ嬉しい${s.emoji}\n${c ? c+'のどんなところが好き？' : 'どんなのが好き？'}${s.emoji}\n${s.name}に教えて${s.emoji}`,
+    // 成約原則: プロフ確認に感謝→返報性＋甘え提案で関係構築
+    (s,n,c) => `${n ? n+'さん' : ''}ありがとう${s.emoji}\nプロフ見てくれて嬉しいな${s.emoji}\n会えたとき甘えてもいい？${s.emoji}`,
+    // 成約原則: 超短文で気軽さ→認知的負荷軽減＋返信しやすさ
+    (s,n,c) => `嬉しい${s.emoji}ありがとう${s.emoji}\n${c ? c+'いいね！' : '楽しみ！'}${s.emoji}\n会えるの楽しみにしてるね${s.emoji}`
+  ],
+  question: [
+    // 成約原則: 短い肯定→質問（深堀りで単純接触効果を最大化）
+    (s,n,c) => `うん！${s.emoji}\nもっと教えて？${s.emoji}\n${s.name}気になっちゃう${s.emoji}`,
+    // 成約原則: 感情的リアクション→具体的質問（ミラーリング＋深堀り）
+    (s,n,c) => `えーそれ気になる${s.emoji}\n${c ? 'どの'+c+'で興奮してくれたの？' : 'どんな感じが好き？'}${s.emoji}`,
+    // 成約原則: 共感の短い相槌→質問（会話のテンポを維持）
+    (s,n,c) => `うんうん${s.emoji}\nどんなところが一番好き？${s.emoji}`,
+    // 成約原則: 感情表現＋質問で会話を続ける→接触回数アップ
+    (s,n,c) => `へ～${s.emoji}\n${c ? c+'って' : 'それって'}どんな感じ？${s.emoji}\nもっと聞きたいな${s.emoji}`
+  ],
+  diary: [
+    // 成約原則: 写メ日記→コンテンツ接着（Phase3: 共通話題で関係構築）
+    (s,n,c) => `${n ? n+'さん' : ''}日記見てくれてるの？${s.emoji}\nめっちゃ嬉しい${s.emoji}\nどの投稿が気になった？${s.emoji}`,
+    // 成約原則: 具体的コンテンツに言及→深い関係構築
+    (s,n,c) => `${c ? c : '動画'}見てくれたんだ${s.emoji}\nありがとう${s.emoji}\nあれ気合い入れて撮ったの${s.emoji}`,
+    // 成約原則: SNSフォロー→マルチ接点で単純接触効果を強化
+    (s,n,c) => `SNSも見てくれてるの？${s.emoji}\n嬉しいな${s.emoji}\nいいね押してくれると${s.name}喜ぶよ${s.emoji}`,
+    // 成約原則: 超短文＋質問で相互やりとりを促進
+    (s,n,c) => `嬉しすぎ${s.emoji}\nまた面白いの載せるね${s.emoji}\nどんなの見たい？${s.emoji}`
+  ],
+  schedule: [
+    // 成約原則: 出勤情報＋さりげなく早い日を推す（希少性＋ダブルバインド）
+    (s,n,c) => `${n ? n+'さん' : ''}${s.emoji}\n${s.name}は基本的に月曜以外出勤してるよ${s.emoji}\n${c ? c+'なら早く会えるから嬉しいな！' : '都合いい日教えてね'}${s.emoji}\n早めの方が${s.name}嬉しい${s.emoji}`,
+    // 成約原則: 具体的な時間提示→認知的負荷軽減（選ぶだけの状態に）
+    (s,n,c) => `出勤だよ${s.emoji}\n基本9時〜20時いるよ${s.emoji}\n${c ? c+'に会えたら嬉しいな！！' : '会えるの楽しみ'}${s.emoji}`,
+    // 成約原則: 感情的理由づけ（早く会いたいから）→ダブルバインド（AかB）
+    (s,n,c) => `${n ? n+'くん' : ''}の都合に合わせるよ${s.emoji}\n${c ? c+'なら早く会えるから嬉しいな！' : 'いつ会える？'}${s.emoji}\n楽しみにしてる${s.emoji}`,
+    // 成約原則: ヘブン誘導＋感情表現（早く会いたい気持ち）
+    (s,n,c) => `会えるの楽しみ${s.emoji}\n出勤スケジュールはヘブンに載ってるよ${s.emoji}\n早く${n ? n+'さんに' : ''}会いたいなっ${s.emoji}`
+  ],
+  booking: [
+    // 成約原則: 先回り情報提供（ホテル＋オプション一括提示）→障壁除去＋認知負荷軽減
+    (s,n,c) => `${n ? n+'さん' : ''}${s.emoji}\nご予約ありがとう${s.emoji}\n初めてだったらウルグレにお電話お願いします${s.emoji}\n\nおすすめホテル：プティバリ、ループ、モンビジュ${s.emoji}\nおすすめOP：電マ、コスプレ${s.emoji}\n\n会えるの楽しみ${s.emoji}`,
+    // 成約原則: 感情的理由づけ＋実用情報をセットで→予約の障壁を下げる
+    (s,n,c) => `予約嬉しい${s.emoji}\n${n ? n+'さんに' : ''}会えるのワクワク${s.emoji}\nホテルは綺麗なところならどこでもOK${s.emoji}\n気になることあったら何でも聞いてね${s.emoji}`,
+    // 成約原則: 個人名で呼ぶ親密感＋オプション情報先出し
+    (s,n,c) => `${n ? n+'さん' : ''}ご予約ありがとうございます${s.emoji}\n${s.name}会えるの楽しみ${s.emoji}\nオプション好きなの選んでね${s.emoji}\n電マとコスプレがおすすめだよ${s.emoji}`,
+    // 成約原則: 写メ日記への言及→コンテンツ接着の維持＋予約後も関係強化
+    (s,n,c) => `わー${s.emoji}ご予約嬉しい${s.emoji}\n初めてのウルグレなら電話予約がスムーズだよ${s.emoji}\n日記読んでくれてたのも嬉しいな${s.emoji}\n当日楽しもうね${s.emoji}`
+  ],
+  thanks: [
+    (s,n,c) => `${n ? n+'さん' : ''}${s.emoji}\n今日はありがとう${s.emoji}\nめちゃくちゃ楽しかった${s.emoji}\nまた会いたいな${s.emoji}\n次も指名してくれたら嬉しい${s.emoji}`,
+    (s,n,c) => `${n ? n+'さん' : ''}ありがとう${s.emoji}\nあっという間だったね${s.emoji}\n${s.name}も楽しくてニコニコだった${s.emoji}\n絶対また会おうね${s.emoji}`,
+    (s,n,c) => `今日はありがとう${s.emoji}\n${n ? n+'さんと' : ''}一緒にいて癒された${s.emoji}\nまた指名してくれたらもっと甘えちゃうよ${s.emoji}`,
+    (s,n,c) => `${n ? n+'さん' : ''}${s.emoji}\n素敵な時間ありがとう${s.emoji}\n${c ? c+'も嬉しかった' : '楽しかったね'}${s.emoji}\n次会えるの楽しみにしてるね${s.emoji}`
+  ],
+  casual: [
+    (s,n,c) => `${n ? n+'くん' : ''}${s.emoji}\n${c || '今日もお疲れ様'}${s.emoji}\n${s.name}は${pickRandom(foods)}食べたよ${s.emoji}\n${n ? n+'さんは' : ''}何食べた？${s.emoji}`,
+    (s,n,c) => `${c || '最近暑いね'}${s.emoji}\n${s.name}は${pickRandom(hobbies)}してたよ${s.emoji}\n${n ? n+'くんは' : ''}何してた？${s.emoji}`,
+    (s,n,c) => `おつかれ${s.emoji}\n${s.name}今日${pickRandom(places)}行ってきた${s.emoji}\n${pickRandom(adjectives)}だった${s.emoji}\n${n ? n+'さんも' : ''}行ってみて${s.emoji}`,
+    (s,n,c) => `${n ? n+'くん' : ''}元気？${s.emoji}\n今日の${s.name}は${pickRandom(['元気いっぱい','ちょっと眠い','テンション高め','まったりモード'])}だよ${s.emoji}`
+  ]
+};
+
+function generateOkiniReply() {
+  const s = getProfileForGen();
+  if (!s.name) { alert('初期設定でお名前を入力してください'); return; }
+  const name = document.getElementById('okiniReplyName').value.trim();
+  const context = document.getElementById('okiniReplyContext').value.trim();
+  const templates = okiniReplyTemplates[selectedReplyScene] || okiniReplyTemplates.interest;
+  const sceneLabels = { interest:'好み共感', question:'質問返し', diary:'日記/SNS', schedule:'スケジュール', booking:'予約サポート', thanks:'予約お礼', casual:'雑談' };
+  let html = `<div style="text-align:center;font-weight:700;color:#c751c0;margin-bottom:12px;">返信テンプレ（${sceneLabels[selectedReplyScene]}）</div>`;
+  const used = new Set();
+  const count = Math.min(3, templates.length);
+  for (let i = 0; i < count; i++) {
+    let idx;
+    do { idx = Math.floor(Math.random() * templates.length); } while (used.has(idx) && used.size < templates.length);
+    used.add(idx);
+    const msg = templates[idx](s, name, context);
+    html += renderOkiniCard(i + 1, msg, `返信/${sceneLabels[selectedReplyScene]}`);
+  }
+  document.getElementById('okiniReplyOutput').innerHTML = html;
+}
+
+// 一斉送信テンプレート
+const okiniBroadcastTemplates = {
+  monthly: [
+    (s,m,note) => `${s.name}です${s.emoji}\n${m}月もたくさん会いに来てくれてありがとうございます${s.emoji}\n${m+1>12?1:m+1}月も${s.name}らしく頑張るのでよろしくね${s.emoji}\n${note ? note+'\n' : ''}予約もメッセージもたくさん待ってるね${s.emoji}`,
+    (s,m,note) => `こんにちは${s.emoji}${s.name}です${s.emoji}\nいつもいっぱい会いに来てくれたお兄様、最近初めて会いに来てくれたお兄様${s.emoji}\nいつも${s.name}を応援してくれてありがとう${s.emoji}\n${m+1>12?1:m+1}月も元気いっぱいの${s.name}をよろしくお願いします${s.emoji}\n${note || ''}`,
+    (s,m,note) => `${s.name}だよ${s.emoji}\n${m}月お疲れ様でした${s.emoji}\n会いに来てくれた人ありがとう${s.emoji}\nまだ会えてない人は${m+1>12?1:m+1}月こそ遊びに来てね${s.emoji}\n${note ? note+'\n' : ''}楽しみに待ってるよ${s.emoji}`
+  ],
+  event: [
+    (s,m,note) => `いつも応援してくれてるお兄様${s.emoji}\nありがとうございます${s.emoji}\n${note || 'イベント開催中です'}\n${s.name}のこと見ててほしいなぁ${s.emoji}\nこの機会にぜひ遊びに来てください${s.emoji}`,
+    (s,m,note) => `${s.name}です${s.emoji}\n${note || 'お得なイベントのお知らせ'}${s.emoji}\nいつものお兄様もまだお会いできてないお兄様も${s.emoji}\nこの機会にぜひ${s.emoji}\nご予約お待ちしてます${s.emoji}`,
+    (s,m,note) => `お知らせ${s.emoji}${s.name}です${s.emoji}\n${note || 'スペシャルイベント開催'}${s.emoji}\nいつもの感謝を込めて${s.emoji}\n遊びに来てくれたら嬉しいな${s.emoji}`
+  ],
+  season: [
+    (s,m,note) => {
+      const seasons = {1:'あけましておめでとう',2:'バレンタイン',3:'春の訪れ',4:'桜の季節',5:'GW',6:'梅雨',7:'夏本番',8:'真夏',9:'秋の気配',10:'ハロウィン',11:'秋深まる',12:'クリスマス'};
+      return `${seasons[m]||''}${s.emoji}\n${s.name}です${s.emoji}\n${note || `${m}月も${s.name}のこと応援してね`}${s.emoji}\n会いに来てくれたら嬉しいな${s.emoji}`;
+    }
+  ],
+  newservice: [
+    (s,m,note) => `${s.name}です${s.emoji}\n${note || '新コースが出来ました'}${s.emoji}\n気になる方はぜひ試してみてね${s.emoji}\n${s.name}と一緒に楽しもう${s.emoji}`,
+    (s,m,note) => `お知らせ${s.emoji}\n${note || '新しいサービスが始まりました'}${s.emoji}\n${s.name}も楽しみにしてるよ${s.emoji}\n体験してくれたら感想教えてね${s.emoji}`
+  ]
+};
+
+function generateOkiniBroadcast() {
+  const s = getProfileForGen();
+  if (!s.name) { alert('初期設定でお名前を入力してください'); return; }
+  const note = document.getElementById('okiniBroadcastNote').value.trim();
+  const month = new Date().getMonth() + 1;
+  const templates = okiniBroadcastTemplates[selectedBroadcastType];
+  const typeLabels = { monthly:'月次挨拶', event:'イベント', season:'季節', newservice:'新サービス' };
+  let html = `<div style="text-align:center;font-weight:700;color:#c751c0;margin-bottom:12px;">一斉送信文（${typeLabels[selectedBroadcastType]}）</div>`;
+  const used = new Set();
+  const count = Math.min(3, templates.length);
+  for (let i = 0; i < count; i++) {
+    let idx;
+    do { idx = Math.floor(Math.random() * templates.length); } while (used.has(idx) && used.size < templates.length);
+    used.add(idx);
+    const msg = templates[idx](s, month, note);
+    html += renderOkiniCard(i + 1, msg, `一斉送信/${typeLabels[selectedBroadcastType]}`);
+  }
+  document.getElementById('okiniBroadcastOutput').innerHTML = html;
+}
+
+function getProfileForGen() {
+  const nameEl = document.getElementById('castName');
+  const n = (nameEl ? nameEl.value.trim() : '') || profile.name || '';
+  const style = getStyle();
+  return {
+    name: n,
+    emoji: getEmoji(),
+    suffix: pickRandom(style.suffix)
+  };
+}
+
+function renderOkiniCard(num, body, category) {
+  return `
+    <div class="output-card">
+      <div class="card-header">
+        <span class="card-num">#${num}</span>
+        <span class="card-category">${category}</span>
+      </div>
+      <div class="card-body">${body}</div>
+      <div class="card-meta">
+        <button class="copy-btn" onclick="copyOkiniMsg(this)">メッセージコピー</button>
+      </div>
+    </div>
+  `;
+}
+
+function copyOkiniMsg(btn) {
+  const card = btn.closest('.output-card');
+  const body = card.querySelector('.card-body').textContent;
+  navigator.clipboard.writeText(body).then(() => {
+    btn.textContent = 'コピー済み！';
+    setTimeout(() => btn.textContent = 'メッセージコピー', 1500);
   });
 }
 </script>

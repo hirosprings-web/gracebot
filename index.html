@@ -14,7 +14,7 @@
   distribution, or use of this software is strictly prohibited.
   ========================================
 -->
-  <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon.png">
 <title>ウルグレBOT</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -58,6 +58,8 @@ textarea { resize: vertical; min-height: 60px; }
 .output-card .card-meta { margin-top: 10px; font-size: 11px; color: #999; display: flex; gap: 12px; }
 .copy-btn { font-size: 11px; padding: 4px 12px; border: 1px solid #c751c0; color: #c751c0; background: #fff; border-radius: 8px; cursor: pointer; }
 .copy-btn:active { background: #c751c0; color: #fff; }
+.gpt-btn { font-size: 11px; padding: 4px 12px; border: 1px solid #10a37f; color: #10a37f; background: #fff; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+.gpt-btn:active { background: #10a37f; color: #fff; }
 .tip-box { background: linear-gradient(135deg, #fff5f9, #f5f0ff); border-radius: 12px; padding: 14px; margin-bottom: 16px; }
 .tip-box .tip-title { font-size: 13px; font-weight: 700; color: #c751c0; margin-bottom: 6px; }
 .tip-box .tip-text { font-size: 12px; color: #666; line-height: 1.6; }
@@ -1341,9 +1343,33 @@ function renderCard(num, title, body, category, isLimited, time) {
       <div class="card-meta">
         <button class="copy-btn" onclick="copyText(this)">タイトルコピー</button>
         <button class="copy-btn" onclick="copyBody(this)">本文コピー</button>
+        <button class="gpt-btn" onclick="openInGPT(this)">チャッピーに相談♥</button>
       </div>
     </div>
   `;
+}
+
+function openInGPT(btn) {
+  const card = btn.closest('.output-card');
+  const body = card.querySelector('.card-body').textContent;
+  const prompt = 'この写メ日記の文章を、キャラはそのままで自然にブラッシュアップして。改行スタイルも維持してね。\n\n' + body;
+  navigator.clipboard.writeText(prompt).then(() => {
+    btn.textContent = 'コピー済み！GPTへ...';
+    // ChatGPTアプリを開く（iOS/Android両対応）
+    window.location.href = 'https://chat.openai.com/';
+    setTimeout(() => btn.textContent = 'チャッピーに相談♥', 2000);
+  });
+}
+
+function openOkiniInGPT(btn) {
+  const card = btn.closest('.output-card');
+  const body = card.querySelector('.card-body').textContent;
+  const prompt = 'このオキニトークメッセージを、キャラの口調はそのままで自然にブラッシュアップして。短文で返信しやすい雰囲気を維持してね。\n\n' + body;
+  navigator.clipboard.writeText(prompt).then(() => {
+    btn.textContent = 'コピー済み！GPTへ...';
+    window.location.href = 'https://chat.openai.com/';
+    setTimeout(() => btn.textContent = 'チャッピーに相談♥', 2000);
+  });
 }
 
 function copyText(btn) {
@@ -1623,6 +1649,7 @@ function renderOkiniCard(num, body, category) {
       <div class="card-body">${body}</div>
       <div class="card-meta">
         <button class="copy-btn" onclick="copyOkiniMsg(this)">メッセージコピー</button>
+        <button class="gpt-btn" onclick="openOkiniInGPT(this)">チャッピーに相談♥</button>
       </div>
     </div>
   `;

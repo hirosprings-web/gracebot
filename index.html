@@ -144,9 +144,9 @@ textarea { resize: vertical; min-height: 60px; }
           <div class="chara-desc">彼女感・隣のお姉さん</div>
         </div>
         <div class="chara-card" data-chara="C">
-          <div class="chara-emoji">👑✨</div>
-          <div class="chara-name">カリスマ権威型</div>
-          <div class="chara-desc">人気嬢の余裕と実績</div>
+          <div class="chara-emoji">📚✨</div>
+          <div class="chara-name">知的お姉さん型</div>
+          <div class="chara-desc">品と知性で魅せる大人の余裕</div>
         </div>
         <div class="chara-card" data-chara="D">
           <div class="chara-emoji">🔞❤️</div>
@@ -196,6 +196,21 @@ textarea { resize: vertical; min-height: 60px; }
         <div class="cat-btn" data-cat="daily">日常系</div>
         <div class="cat-btn" data-cat="soldout">完売アピール</div>
         <div class="cat-btn" data-cat="video">動画/SNS</div>
+      </div>
+    </div>
+
+    <!-- 出勤告知専用：出勤・退勤時間 -->
+    <div class="section hidden" id="attendSection">
+      <div class="section-title">出勤・退勤時間</div>
+      <div style="display:flex;gap:8px;">
+        <div class="input-group" style="flex:1;">
+          <label>出勤</label>
+          <select id="attendStart"></select>
+        </div>
+        <div class="input-group" style="flex:1;">
+          <label>退勤</label>
+          <select id="attendEnd"></select>
+        </div>
       </div>
     </div>
 
@@ -289,9 +304,15 @@ textarea { resize: vertical; min-height: 60px; }
     </div>
 
     <div class="section">
-      <div class="input-group">
-        <label>出勤時間（出勤日の場合）</label>
-        <input type="text" id="workTime" placeholder="例: 18:00〜翌3:00">
+      <div style="display:flex;gap:8px;">
+        <div class="input-group" style="flex:1;">
+          <label>出勤時間</label>
+          <select id="batchStart"></select>
+        </div>
+        <div class="input-group" style="flex:1;">
+          <label>退勤時間</label>
+          <select id="batchEnd"></select>
+        </div>
       </div>
       <div class="input-group">
         <label>今日の特記事項（任意）</label>
@@ -375,7 +396,7 @@ textarea { resize: vertical; min-height: 60px; }
       <div class="tip-text">
         <b>小悪魔甘え:</b> 「〜してあげる💜」構文が鍵<br>
         <b>親しみ日常:</b> 食事・趣味の写真を多めに<br>
-        <b>カリスマ:</b> 実績数字を具体的に出す<br>
+        <b>知的お姉さん:</b> 落ち着いた語り口で品のある誘導<br>
         <b>過激エロ:</b> 動画▶️マーク+時間限定が効果大<br>
         <b>清楚マメ:</b> 空き枠情報を丁寧にこまめに<br>
         <b>アイドル:</b> 投票・YouTube等でファン参加を促す
@@ -548,6 +569,29 @@ document.querySelectorAll('.chara-card').forEach(card => {
   });
 });
 
+// 出勤・退勤時間プルダウン生成（6:00〜翌5:00、30分刻み）
+function populateTimeSelect(id, defaultVal) {
+  const sel = document.getElementById(id);
+  if (!sel) return;
+  sel.innerHTML = '<option value="">未設定</option>';
+  for (let h = 6; h < 30; h++) {
+    for (let m = 0; m < 60; m += 30) {
+      const dispH = h >= 24 ? h - 24 : h;
+      const label = `${String(dispH).padStart(2,'0')}:${String(m).padStart(2,'0')}` + (h >= 24 ? '(翌)' : '');
+      const val = `${String(dispH).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+      const opt = document.createElement('option');
+      opt.value = val;
+      opt.textContent = label;
+      if (val === defaultVal) opt.selected = true;
+      sel.appendChild(opt);
+    }
+  }
+}
+populateTimeSelect('attendStart', '');
+populateTimeSelect('attendEnd', '');
+populateTimeSelect('batchStart', '');
+populateTimeSelect('batchEnd', '');
+
 // Category selection
 document.querySelectorAll('.cat-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -556,7 +600,9 @@ document.querySelectorAll('.cat-btn').forEach(btn => {
     selectedCat = btn.dataset.cat;
     // お礼日記選択時のみお礼相手入力を表示
     const ts = document.getElementById('thanksSection');
+    const as = document.getElementById('attendSection');
     if (selectedCat === 'thanks') { ts.classList.remove('hidden'); } else { ts.classList.add('hidden'); }
+    if (selectedCat === 'attend') { as.classList.remove('hidden'); } else { as.classList.add('hidden'); }
   });
 });
 
@@ -700,12 +746,30 @@ if (profile.name) {
 
 // Character templates
 const charaStyles = {
-  A: { suffix: ['だよ💜','しちゃう❓','してあげる💕','ね💜','かも…💜'], emojis: ['💜','💕','❓','🔞','💎','🐰'], pronoun: 'あたし' },
-  B: { suffix: ['だよ♥️','した！','なの😊','よね🍽','かな♥️'], emojis: ['♥️','😊','🍽','🌸','🍺','☀️'], pronoun: 'わたし' },
-  C: { suffix: ['だよ✨','だから！','してね！！！','よ♡','でしょ✨'], emojis: ['✨','👑','💫','🔥','♡','🎀'], pronoun: 'わたし' },
-  D: { suffix: ['よ❤️','だよ🩷','してね🔞','…🩷','えちえち🔞'], emojis: ['❤️','🩷','🔞','▶️','㊙️','💦'], pronoun: 'わたし' },
-  E: { suffix: ['です🩷','ます💗','かな？🫣','ください💗','ね🩷'], emojis: ['🩷','💗','🙆‍♀️','🫣','💦','🌟'], pronoun: 'わたし' },
-  F: { suffix: ['だよ💖','してね💛','ー！🩵','よろしく💖','ね🥺'], emojis: ['💛','💖','🩵','💕','🥺','🎤'], pronoun: '' }
+  A: {
+    suffix: ['だよ💜','しちゃう❓','してあげる💕','ね💜','かも…💜'],
+    emojis: ['💜','💕','❓','🔞','💎','🐰'], pronoun: 'あたし'
+  },
+  B: {
+    suffix: ['だよ♥️','した！','なの😊','よね🍽','かな♥️'],
+    emojis: ['♥️','😊','🍽','🌸','🍺','☀️'], pronoun: 'わたし'
+  },
+  C: {
+    suffix: ['だよ✨','よ。','してね♡','かしら✨','でしょ？'],
+    emojis: ['✨','📚','🌙','🍷','♡','🫧'], pronoun: 'わたし'
+  },
+  D: {
+    suffix: ['よ❤️','だよ🩷','してね🔞','…🩷','えちえち🔞'],
+    emojis: ['❤️','🩷','🔞','▶️','㊙️','💦'], pronoun: 'わたし'
+  },
+  E: {
+    suffix: ['です🩷','ます💗','かな？🫣','ください💗','ね🩷'],
+    emojis: ['🩷','💗','🙆‍♀️','🫣','💦','🌟'], pronoun: 'わたし'
+  },
+  F: {
+    suffix: ['だよ💖','してね💛','ー！🩵','よろしく💖','ね🥺'],
+    emojis: ['💛','💖','🩵','💕','🥺','🎤'], pronoun: ''
+  }
 };
 
 function getStyle() {
@@ -1104,6 +1168,22 @@ function generateSingle() {
 
   let finalBody = body;
 
+  // 出勤告知の場合、出勤・退勤時間を差し込む
+  if (cat === 'attend') {
+    const aStart = document.getElementById('attendStart').value;
+    const aEnd = document.getElementById('attendEnd').value;
+    const timeStr = aStart ? (aStart + (aEnd ? '〜' + aEnd : '')) : '';
+    if (timeStr) {
+      if (finalBody.includes('出勤するよ') || finalBody.includes('出勤しました')) {
+        finalBody = finalBody.replace(/出勤するよ/, `${timeStr}出勤するよ`).replace(/出勤しました/, `${timeStr}出勤しました`);
+      } else if (finalBody.includes('今日は出勤') || finalBody.includes('今日も')) {
+        finalBody = finalBody.replace(/今日は出勤/, `今日は${timeStr}で出勤`).replace(/今日も/, `今日も${timeStr}で`);
+      } else {
+        finalBody = `${timeStr}\n${finalBody}`;
+      }
+    }
+  }
+
   // お礼日記の場合、お礼相手テキストを差し込む
   if (cat === 'thanks') {
     const thanksData = getThanksData();
@@ -1183,7 +1263,9 @@ const timeSlots = ['8:00-10:00','10:00-12:00','12:00-14:00','14:00-16:00','16:00
 const catTimeOrder = ['daily','attend','sexy','attend','video','sexy','attend','thanks','soldout','daily','daily','daily'];
 
 function generateBatch() {
-  const workTime = document.getElementById('workTime').value;
+  const batchStartTime = document.getElementById('batchStart').value;
+  const batchEndTime = document.getElementById('batchEnd').value;
+  const workTime = batchStartTime ? (batchStartTime + (batchEndTime ? '〜' + batchEndTime : '')) : '';
   const note = document.getElementById('batchNote').value;
   const s = getStyle();
 
@@ -1221,7 +1303,16 @@ function generateBatch() {
     const title = pickRandom(t.titles)();
     let body = pickRandom(t.bodies)(s);
     if (note && i === 0) body += `\n\n${note}`;
-    if (workTime && slot.cat === 'attend') body = body.replace('出勤', `${workTime}出勤`);
+    if (workTime && slot.cat === 'attend') {
+      // 出勤告知に時間を自然に挿入
+      if (body.includes('今日は出勤') || body.includes('今日も')) {
+        body = body.replace(/今日は出勤/, `今日は${workTime}で出勤`).replace(/今日も/, `今日も${workTime}で`);
+      } else if (body.includes('出勤するよ') || body.includes('出勤しました')) {
+        body = body.replace(/出勤するよ/, `${workTime}出勤するよ`).replace(/出勤しました/, `${workTime}出勤しました`);
+      } else {
+        body = `${workTime}\n${body}`;
+      }
+    }
     // お礼日記の場合、お礼相手を差し込む
     if (slot.cat === 'thanks' && batchThanksData.length > 0) {
       body += buildThanksText(batchThanksData, batchThanksStyle);
@@ -1305,21 +1396,21 @@ function selectBroadcast(el) {
 // 初回メッセージテンプレート
 const okiniFirstTemplates = {
   ero: [
-    s => `はじめまして${s.name}です${s.emoji}\nマイガール登録ありがとう${s.emoji}\n嬉しすぎてメッセージしちゃいました${s.emoji}\nどんなエッチが好きですか⁉️${s.emoji}`,
-    s => `はじめまして${s.emoji}${s.name}です${s.emoji}\nマイガール登録ありがとっ${s.emoji}\n${s.name}はエッチな事が大好きで責められるとすぐにいっちゃいます${s.emoji}\nイチャイチャも大好きなのでたくさんくっついてラブラブしよーね${s.emoji}`,
+    s => `はじめまして${s.name}です${s.emoji}\nマイガール登録ありがとう${s.emoji}\n嬉しすぎてメッセージしちゃいました${s.emoji}\n${s.name}は${s.sp}が得意だよ${s.emoji}\nどんなエッチが好きですか⁉️${s.emoji}`,
+    s => `はじめまして${s.emoji}${s.name}です${s.emoji}\nマイガール登録ありがとっ${s.emoji}\n${s.name}は${s.sp}が大好きで責められるとすぐにいっちゃいます${s.emoji}\nたくさんくっついてラブラブしよーね${s.emoji}`,
     s => `はじめまして${s.name}だよ${s.emoji}\nマイガール嬉しい${s.emoji}\n${s.name}ね、甘えん坊だから一緒にいるとすぐくっつきたくなっちゃうの${s.emoji}\nどんな風に楽しみたいか教えてね${s.emoji}`,
-    s => `${s.name}です${s.emoji}マイガールありがとう${s.emoji}\nプロフ見てくれたのかな？${s.emoji}\n実は${s.name}…感度がすごくて触られただけでトロトロになっちゃうの${s.emoji}\n一緒にドキドキしたいな${s.emoji}`,
-    s => `初めまして${s.name}です${s.emoji}\nマイガール登録ありがとうございます${s.emoji}\n${s.name}はキスとイチャイチャが大好き${s.emoji}\n密着してラブラブな時間を過ごしたいな${s.emoji}\nお兄さんの好きなこと教えてね${s.emoji}`
+    s => `${s.name}です${s.emoji}マイガールありがとう${s.emoji}\nプロフ見てくれたのかな？${s.emoji}\n実は${s.name}…${s.sp}してるとトロトロになっちゃうの${s.emoji}\n一緒にドキドキしたいな${s.emoji}`,
+    s => `初めまして${s.name}です${s.emoji}\nマイガール登録ありがとうございます${s.emoji}\n${s.name}は${s.sp}が大好き${s.emoji}\nラブラブな時間を過ごしたいな${s.emoji}\nお兄さんの好きなこと教えてね${s.emoji}`
   ],
   heal: [
     // 成約原則: バーナム効果（誰にでも当てはまる癒し）＋返報性（全力ぎゅー）＋低認知負荷（短文）
-    s => `マイガール登録ありがとうございます${s.emoji}\n${s.name}です${s.emoji}\n心と心が繋がるあったかい時間を一緒に過ごせたらうれしいなっ${s.emoji}\nちょっぴり疲れたお兄さん、${s.name}が全力でぎゅーするからね！\nお返事待ってるね${s.emoji}`,
+    s => `マイガール登録ありがとうございます${s.emoji}\n${s.name}です${s.emoji}\n${s.sp}で心も身体もあったかくなれたらうれしいなっ${s.emoji}\nちょっぴり疲れたお兄さん、${s.name}が全力で癒すからね！\nお返事待ってるね${s.emoji}`,
     // 成約原則: 短文＋温かさ＋ハードル下げ（お話からでOK）
     s => `マイガール登録ありがとう${s.emoji}\n${s.name}です${s.emoji}\nお仕事お疲れ様${s.emoji}\nまずはお話からでいいので気軽にメッセージしてね${s.emoji}`,
     // 成約原則: 関係構築を急がない姿勢→安心感（初頭効果で好印象）
     s => `はじめまして${s.emoji}${s.name}です${s.emoji}\nマイガール嬉しいな${s.emoji}\nゆっくり仲良くなれたらいいね${s.emoji}\nいつでもお話しようね${s.emoji}`,
     // 成約原則: 短文＋バーナム効果（元気にしたい）＋質問で返信促進
-    s => `${s.name}です${s.emoji}マイガールありがとう${s.emoji}\n笑顔にさせるの得意だから${s.emoji}\nどんなお話でもいいから聞かせてね${s.emoji}`,
+    s => `${s.name}です${s.emoji}マイガールありがとう${s.emoji}\n${s.sp}で笑顔にさせるの得意だから${s.emoji}\nどんなお話でもいいから聞かせてね${s.emoji}`,
     // 成約原則: 控えめアプローチ→安心感＋自然な関係構築
     s => `マイガール登録してくれてありがとう${s.emoji}\n${s.name}です${s.emoji}\nもし少しでも気になってくれたなら嬉しいな${s.emoji}\nゆっくり仲良くなろうね${s.emoji}`
   ],
@@ -1327,13 +1418,13 @@ const okiniFirstTemplates = {
     s => `マイガール登録ありがとう${s.emoji}\n${s.name}だよっ${s.emoji}\nめっちゃ嬉しい${s.emoji}\n${s.name}のこと気になってくれた？${s.emoji}\nたくさん甘えさせてね${s.emoji}\n会えるの楽しみにしてるっ${s.emoji}`,
     s => `はじめまして${s.emoji}${s.name}だよ${s.emoji}\nマイガールありがと${s.emoji}\n${s.name}ね、甘えるの大好きなの${s.emoji}\n「かわいい」って言ってくれる人にはもっと甘えちゃう${s.emoji}\nどんなお兄さんか気になるな${s.emoji}`,
     s => `${s.name}です${s.emoji}\nマイガール登録嬉しい${s.emoji}\nぎゅーってされるのが大好き${s.emoji}\n一緒にいたらいっぱいくっつくけど大丈夫？${s.emoji}\nお返事待ってるね${s.emoji}`,
-    s => `わーいマイガールありがとう${s.emoji}\n${s.name}だよ${s.emoji}\n嬉しくてテンション上がっちゃった${s.emoji}\nどんな時間を一緒に過ごしたいか教えてくれたら${s.name}頑張っちゃうよ${s.emoji}`,
+    s => `わーいマイガールありがとう${s.emoji}\n${s.name}だよ${s.emoji}\n嬉しくてテンション上がっちゃった${s.emoji}\n${s.sp}が得意だから${s.name}に任せてね${s.emoji}\n会えるの楽しみ${s.emoji}`,
     s => `マイガール嬉しいっ${s.emoji}${s.name}です${s.emoji}\n写メ日記見てくれたのかな？${s.emoji}\nもっとたくさん${s.name}のこと知ってほしいなっ${s.emoji}\nメッセージ待ってるね${s.emoji}`
   ],
   idol: [
     s => `マイガール登録ありがとう${s.emoji}\n${s.name}です${s.emoji}\n応援してくれるの？${s.emoji}嬉しすぎる${s.emoji}\n${s.name}のこと推してくれたら、もっともっと頑張れるよ${s.emoji}\nこれからよろしくね${s.emoji}`,
     s => `はじめまして${s.emoji}${s.name}です${s.emoji}\nマイガール＝推し登録ってことでいいよね？${s.emoji}\n全力で推されたい${s.name}をよろしくっ${s.emoji}\n写メ日記もたくさん見てね${s.emoji}`,
-    s => `${s.name}だよ${s.emoji}\nマイガールありがとう${s.emoji}\n推してくれてる人のためにもっと可愛くなるからね${s.emoji}\n一緒に楽しい時間つくろうね${s.emoji}\nDMいつでもウェルカム${s.emoji}`,
+    s => `${s.name}だよ${s.emoji}\nマイガールありがとう${s.emoji}\n${s.sp}には自信あるから期待しててね${s.emoji}\n一緒に楽しい時間つくろうね${s.emoji}\nDMいつでもウェルカム${s.emoji}`,
     s => `マイガール嬉しい${s.emoji}${s.name}です${s.emoji}\n新しい推しさんだ${s.emoji}\n${s.name}のこと世界一かわいいって思ってくれたら嬉しいな${s.emoji}\n写メ日記と動画チェックしてね${s.emoji}`,
     s => `${s.name}です${s.emoji}マイガールありがとう${s.emoji}\nSNSも見てくれたら嬉しいな${s.emoji}\nいいね押してくれると${s.name}が喜びます${s.emoji}\nまずは推しからスタートしよ${s.emoji}`
   ]
@@ -1341,8 +1432,8 @@ const okiniFirstTemplates = {
 
 // キャラ連動マッピング
 const charaToFirstStyle = {
-  koakuma: 'cute', shitashimi: 'heal', charisma: 'ero',
-  kageki: 'ero', seiso: 'heal', idol: 'idol'
+  A: 'cute', B: 'heal', C: 'heal',
+  D: 'ero', E: 'heal', F: 'idol'
 };
 
 function getOkiniStyle() {
@@ -1505,10 +1596,19 @@ function getProfileForGen() {
   const nameEl = document.getElementById('castName');
   const n = (nameEl ? nameEl.value.trim() : '') || profile.name || '';
   const style = getStyle();
+  const sp = (profile.specialty || '').trim();
+  // emoji をgetterにして毎回ランダムに変わるようにする
   return {
     name: n,
-    emoji: getEmoji(),
-    suffix: pickRandom(style.suffix)
+    get emoji() { return getEmoji(); },
+    suffix: pickRandom(style.suffix),
+    specialty: sp,
+    // 得意プレイがあればランダムに1つ返す、なければ汎用ワード
+    get sp() {
+      if (!sp) return pickRandom(['イチャイチャ','密着','甘えっこ']);
+      const items = sp.split(/[、,／/\s]+/).filter(x => x);
+      return items.length ? pickRandom(items) : 'イチャイチャ';
+    }
   };
 }
 

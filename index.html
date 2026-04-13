@@ -460,6 +460,11 @@ textarea { resize: vertical; min-height: 60px; }
           <div class="cat-btn" data-rscene="booking" onclick="selectReplyScene(this)">予約サポート</div>
           <div class="cat-btn" data-rscene="thanks" onclick="selectReplyScene(this)">予約お礼</div>
           <div class="cat-btn" data-rscene="casual" onclick="selectReplyScene(this)">雑談</div>
+          <div class="cat-btn" data-rscene="review" onclick="selectReplyScene(this)">口コミお礼</div>
+          <div class="cat-btn" data-rscene="gift" onclick="selectReplyScene(this)">差し入れお礼</div>
+          <div class="cat-btn" data-rscene="mitene" onclick="selectReplyScene(this)">ミテネ返し</div>
+          <div class="cat-btn" data-rscene="dayof" onclick="selectReplyScene(this)">当日フォロー</div>
+          <div class="cat-btn" data-rscene="greeting" onclick="selectReplyScene(this)">初めまして返信</div>
         </div>
       </div>
       <div class="input-group">
@@ -859,7 +864,21 @@ const templates = {
       () => `妄想してみて${getEmoji()}`,
       () => `ぴったりフィット${getEmoji()}`,
       () => `汗ばんだ${getEmoji()}`,
-      () => `誰かあっためて${getEmoji()}`
+      () => `誰かあっためて${getEmoji()}`,
+      () => `どこ見てるの？${getEmoji()}`,
+      () => `気になっちゃう？${getEmoji()}`,
+      () => `これ以上見る？${getEmoji()}🔞`,
+      () => `触ってみたい？${getEmoji()}`,
+      () => `どっちが好き？${getEmoji()}`,
+      () => `何してほしい？${getEmoji()}`,
+      () => `目が離せない？${getEmoji()}`,
+      () => `想像してみて？${getEmoji()}`,
+      () => `…続き気になる？${getEmoji()}🔞`,
+      () => `隣にいたらどうする？${getEmoji()}`,
+      () => `こんな${getName()}どう？${getEmoji()}`,
+      () => `一緒に溶けない？${getEmoji()}`,
+      () => `今夜どうする？${getEmoji()}`,
+      () => `まだ見てないの？${getEmoji()}`
     ],
     bodies: [
       (s) => `今日の${getName()}${getEmoji()}\n\nちょっとだけ\n見せちゃう${pickRandom(s.suffix)}\n\n気になる人は\n会いに来て${getEmoji()}`,
@@ -873,7 +892,7 @@ const templates = {
       (s) => `ベッドの上で\n撮ったよ${getEmoji()}\n\nちょっとだけ\nセクシー？${getEmoji()}\n\n続きは会ってから${pickRandom(s.suffix)}`,
       (s) => `${rBody()}のラインが\nきれいに撮れた${getEmoji()}\n\nこういうの\n好き？${getEmoji()}\n\n${getName()}の\n魅力伝わるかな${pickRandom(s.suffix)}`,
       (s) => `鏡の前で\nパシャリ${getEmoji()}\n\n今日の${getName()}\nかわいくない？${getEmoji()}\n\n褒めてくれたら\nもっと見せちゃう${pickRandom(s.suffix)}`,
-      (s) => `ねぇ…\n秘密にしてね${getEmoji()}\n\nこんな写真\n撮っちゃった${getEmoji()}\n\nマイガール限定で\nもっとあるよ${pickRandom(s.suffix)}`,
+      (s) => `ねぇ…\n秘密にしてね${getEmoji()}\n\nこんな写真\n撮っちゃった${getEmoji()}\n\nマイガール限定で\nもっと見れる${pickRandom(s.suffix)}`,
       (s) => `${rLingerie()}\n買っちゃった${getEmoji()}\n\nどっちが似合う？\n1. 黒\n2. 白${getEmoji()}\n\nコメントで\n教えてね${pickRandom(s.suffix)}`,
       (s) => `${rAdj()}…${getEmoji()}\n\n今日の${getName()}\n自分でもびっくり\nするくらい\nいい感じ${getEmoji()}\n\n会いに来たら\nもっとすごいよ${pickRandom(s.suffix)}`,
       (s) => `${timeGreets()}${getEmoji()}\n\nまだ眠いから\nベッドでゴロゴロ${getEmoji()}\n\nパジャマ姿\nちょっと見せちゃう${getEmoji()}\n\n起こしに来て${pickRandom(s.suffix)}`,
@@ -924,7 +943,15 @@ const templates = {
       () => `深夜も受付中${getEmoji()}`,
       () => `残りわずか${getEmoji()}`,
       () => `ぽっかり空いた${getEmoji()}`,
-      () => `早い者勝ち${getEmoji()}`
+      () => `早い者勝ち${getEmoji()}`,
+      () => `今日会わない？${getEmoji()}`,
+      () => `寂しくない？${getEmoji()}`,
+      () => `予定空いてる？${getEmoji()}`,
+      () => `会いたくない？${getEmoji()}`,
+      () => `あと何枠だと思う？${getEmoji()}`,
+      () => `まだ迷ってるの？${getEmoji()}`,
+      () => `ご褒美いらない？${getEmoji()}`,
+      () => `癒されたくない？${getEmoji()}`
     ],
     bodies: [
       (s) => `おはよう${getEmoji()}\n\n今日は出勤${pickRandom(s.suffix)}\n\nまだ空いてる時間\nあるから\n遊びに来て${getEmoji()}\n\n予約はお電話か\nネットからどうぞ${getEmoji()}`,
@@ -942,7 +969,9 @@ const templates = {
       (s) => `ラスト1枠${getEmoji()}\n\n残り1つだけ\n空いてます${getEmoji()}\n\n迷ってる間に\n埋まっちゃうかも${pickRandom(s.suffix)}\n\nお早めにね${getEmoji()}`,
       (s) => `明日の出勤予告${getEmoji()}\n\n明日も出勤するよ${getEmoji()}\n\n事前予約\n大歓迎${getEmoji()}\n\n前日予約で\n確実にGET${pickRandom(s.suffix)}`,
       (s) => `深夜帯${getEmoji()}\n\nまだまだ\nご案内できます${getEmoji()}\n\n夜更かし組\nいらっしゃい${pickRandom(s.suffix)}\n\n${getName()}待ってるよ${getEmoji()}`,
-      (s) => `今日のコンディション\n最高${getEmoji()}\n\n気分いいから\n楽しめること\n間違いなし${getEmoji()}\n\nこういう日に\n会いに来て${pickRandom(s.suffix)}`
+      (s) => `今日のコンディション\n最高${getEmoji()}\n\n気分いいから\n楽しめること\n間違いなし${getEmoji()}\n\nこういう日に\n会いに来て${pickRandom(s.suffix)}`,
+      (s) => `出勤情報を\nいち早くGETするなら${getEmoji()}\n\nマイガール登録\nしておくと\n便利${pickRandom(s.suffix)}\n\n限定写真も\n見れちゃうよ${getEmoji()}\n\nまだの人は\nぜひ登録してね${getEmoji()}`,
+      (s) => `予約取れなかった方へ${getEmoji()}\n\nマイガール登録\nしてくれてたら\n出勤情報\n早めにお届け${pickRandom(s.suffix)}\n\n次こそ\n会えるように\n登録しておいてね${getEmoji()}`
     ]
   },
   thanks: {
@@ -976,7 +1005,14 @@ const templates = {
       () => `常連さんへ${getEmoji()}`,
       () => `次も楽しみ${getEmoji()}`,
       () => `心がぽかぽか${getEmoji()}`,
-      () => `帰りの電車で${getEmoji()}`
+      () => `帰りの電車で${getEmoji()}`,
+      () => `「かわいい」って${getEmoji()}`,
+      () => `言われて照れた${getEmoji()}`,
+      () => `あの一言が嬉しくて${getEmoji()}`,
+      () => `今日のベスト発言${getEmoji()}`,
+      () => `お客様語録${getEmoji()}`,
+      () => `こんなこと言われた${getEmoji()}`,
+      () => `あの瞬間${getEmoji()}`
     ],
     bodies: [
       (s) => `今日来てくれた皆さん\nありがとう${getEmoji()}\n\nとっても楽しい時間\n過ごせました${getEmoji()}\n\nまた${getName()}に\n会いに来てね${pickRandom(s.suffix)}\n\n大好き${getEmoji()}`,
@@ -994,7 +1030,14 @@ const templates = {
       (s) => `今日の反省点${getEmoji()}\n\n楽しすぎて\n時間足りなかった${getEmoji()}\n\nもっと長く\n一緒にいたかった${getEmoji()}\n\n次は長い時間で\n来てね${pickRandom(s.suffix)}`,
       (s) => `写真見返してたら${getEmoji()}\n\n今日の写真\nめっちゃいい笑顔${getEmoji()}\n\nこれは\nみんなが楽しませて\nくれたおかげ${getEmoji()}\n\nありがとう${pickRandom(s.suffix)}`,
       (s) => `帰ってきた${getEmoji()}\n\nお風呂入りながら\n今日のこと\n振り返り中${getEmoji()}\n\nひとりひとりとの\n時間が\n全部宝物${pickRandom(s.suffix)}\n\n大好き${getEmoji()}`,
-      (s) => `マイガール登録\nしてくれた方${getEmoji()}\n\n今日新しく\n登録してくれた人\nいてめちゃ嬉しい${getEmoji()}\n\n限定コンテンツ\n楽しんでね${pickRandom(s.suffix)}\n\nこれからも頑張る${getEmoji()}`
+      (s) => `マイガール登録\nしてくれた方${getEmoji()}\n\n今日新しく\n登録してくれた人\nいてめちゃ嬉しい${getEmoji()}\n\n限定コンテンツ\n楽しんでね${pickRandom(s.suffix)}\n\nこれからも頑張る${getEmoji()}`,
+      (s) => `今日来てくれた方が\n「肌すべすべだね」\nって${getEmoji()}\n\n嬉しすぎて\nずっとニヤニヤ\nしちゃった${getEmoji()}\n\nお手入れ頑張ってる\nかいがあった${pickRandom(s.suffix)}\n\nまた触りに来て${getEmoji()}`,
+      (s) => `「${getName()}に\n会えて元気出た」\nって言ってくれた方${getEmoji()}\n\n${getName()}の方が\n元気もらったよ${getEmoji()}\n\nこういう言葉が\n一番嬉しい${pickRandom(s.suffix)}\n\nありがとう${getEmoji()}`,
+      (s) => `今日のお客様が\n「また来るね」\nって帰り際に${getEmoji()}\n\n何回聞いても\nこの言葉は\n嬉しい${getEmoji()}\n\n待ってるから\n本当に来てね${pickRandom(s.suffix)}`,
+      (s) => `「緊張してます」\nって言ってた\n初めましての方${getEmoji()}\n\n最後には\nめっちゃ笑顔に\nなってくれて${getEmoji()}\n\n${getName()}も嬉しかった${pickRandom(s.suffix)}\n\n次は緊張しないでね${getEmoji()}`,
+      (s) => `「癒された」\nって言ってくれた\nお兄さん${getEmoji()}\n\nお仕事大変\nだったんだよね${getEmoji()}\n\n${getName()}が\n少しでも\n力になれてたら\n嬉しいな${pickRandom(s.suffix)}`,
+      (s) => `今日の名言${getEmoji()}\n\n「${getName()}は\n太陽みたい」\nって${getEmoji()}\n\n恥ずかしいけど\nめちゃくちゃ嬉しい${getEmoji()}\n\nこれからも\n明るく頑張る${pickRandom(s.suffix)}`,
+      (s) => `差し入れで\n${rFood()}もらった${getEmoji()}\n\n「${getName()}が\n好きって言ってたから」\nって${getEmoji()}\n\n覚えてくれてたの\n嬉しすぎ${pickRandom(s.suffix)}\n\n美味しくいただきます${getEmoji()}`
     ]
   },
   daily: {
@@ -1064,7 +1107,8 @@ const templates = {
       (s) => `今日の${getName()}の\n1日${getEmoji()}\n\n朝: ${rHobby()}\n昼: ${rFood()}\n夜: ${rHobby()}${getEmoji()}\n\n充実してた${pickRandom(s.suffix)}\n\nみんなは？${getEmoji()}`,
       (s) => `ストレッチ\n始めてみた${getEmoji()}\n\n体柔らかく\nなりたい${getEmoji()}\n\n柔軟性UPしたら\nいいこと\nあるかもね${pickRandom(s.suffix)}\n\nふふ${getEmoji()}`,
       (s) => `${timeGreets()}${getEmoji()}\n\n今日は何の日\nだろうって\n調べたら${getEmoji()}\n\n面白い記念日\nだった${getEmoji()}\n\nどうでもいい\n情報でした${pickRandom(s.suffix)}`,
-      (s) => `コンビニの\n新作スイーツ${getEmoji()}\n\n見つけたら\n絶対買っちゃう${getEmoji()}\n\n今日は\n${rFood()}風の\nやつゲット${pickRandom(s.suffix)}\n\n甘いもの最高${getEmoji()}`
+      (s) => `コンビニの\n新作スイーツ${getEmoji()}\n\n見つけたら\n絶対買っちゃう${getEmoji()}\n\n今日は\n${rFood()}風の\nやつゲット${pickRandom(s.suffix)}\n\n甘いもの最高${getEmoji()}`,
+      (s) => `${getName()}の日常\nもっと知りたい人へ${getEmoji()}\n\nマイガール登録\nしてくれたら\nこういう写真\nもっと見れるよ${pickRandom(s.suffix)}\n\nお仕事モードじゃない\n${getName()}も\n見てほしいな${getEmoji()}`
     ]
   },
   soldout: {
@@ -1091,7 +1135,17 @@ const templates = {
       () => `○連続完売${getEmoji()}`,
       () => `自己ベスト更新${getEmoji()}`,
       () => `感動してる${getEmoji()}`,
-      () => `夢みたい${getEmoji()}完売`
+      () => `夢みたい${getEmoji()}完売`,
+      () => `あと１枠…${getEmoji()}`,
+      () => `急いで${getEmoji()}残りわずか`,
+      () => `今日取れないかも${getEmoji()}`,
+      () => `争奪戦${getEmoji()}`,
+      () => `ラスト１枠だよ${getEmoji()}`,
+      () => `秒で埋まった${getEmoji()}`,
+      () => `当日じゃ遅いよ${getEmoji()}`,
+      () => `予約戦争${getEmoji()}勃発`,
+      () => `指名殺到${getEmoji()}`,
+      () => `取れた人ラッキー${getEmoji()}`
     ],
     bodies: [
       (s) => `今日も完売${getEmoji()}\n\nありがとうございます${getEmoji()}\n\n${getName()}に\n会いに来てくれて\nほんとに嬉しい${getEmoji()}\n\n次の出勤も\nお早めに予約してね${pickRandom(s.suffix)}`,
@@ -1108,7 +1162,14 @@ const templates = {
       (s) => `完売後のひとりごと${getEmoji()}\n\n今日は○名の方に\nお会いできました${getEmoji()}\n\n1人1人との時間が\n本当に幸せ${getEmoji()}\n\nまた次も\n全力で\nお迎えするね${pickRandom(s.suffix)}`,
       (s) => `キャンセル待ち\nの方へ${getEmoji()}\n\n今日は\nお待ちいただいたのに\n案内できず\nすみません${getEmoji()}\n\n次回出勤日に\n優先的に\nご案内しますね${pickRandom(s.suffix)}\n\nよろしくお願いします${getEmoji()}`,
       (s) => `自己最速完売${getEmoji()}\n\n出勤前に\n全部埋まった${getEmoji()}\n\n信じられない${getEmoji()}\n\nこんなに\n求めてもらえて\n${getName()}は\n世界一幸せ${pickRandom(s.suffix)}`,
-      (s) => `SOLD OUT${getEmoji()}\n\n開始○時間で\n完売しました${getEmoji()}\n\n前日予約してくれた方\nありがとう${getEmoji()}\n\n当日だと\n取れないかも\nなので\nお早めに${pickRandom(s.suffix)}`
+      (s) => `SOLD OUT${getEmoji()}\n\n開始○時間で\n完売しました${getEmoji()}\n\n前日予約してくれた方\nありがとう${getEmoji()}\n\n当日だと\n取れないかも\nなので\nお早めに${pickRandom(s.suffix)}`,
+      (s) => `残り１枠${getEmoji()}\n\n…と思ったら\n今埋まった${getEmoji()}\n\nごめんなさい${getEmoji()}\n\n次回こそ\n前日までに\n予約してね${pickRandom(s.suffix)}`,
+      (s) => `秒で完売${getEmoji()}\n\n受付開始して\nすぐ埋まった${getEmoji()}\n\n${getName()}自身が\nびっくりしてる${getEmoji()}\n\n次は前日予約が\n確実${pickRandom(s.suffix)}`,
+      (s) => `指名殺到中${getEmoji()}\n\n最近ありがたいことに\n予約が取りにくく\nなってます${getEmoji()}\n\n確実に会いたい方は\n前日の夜までに\nご予約を${pickRandom(s.suffix)}\n\nお待ちしてます${getEmoji()}`,
+      (s) => `争奪戦\nありがとう${getEmoji()}\n\n今日もたくさんの\nお問い合わせ${getEmoji()}\n\n取れなかった方\n次は早い者勝ち${getEmoji()}\n\n${getName()}の予約は\n計画的に${pickRandom(s.suffix)}`,
+      (s) => `当日予約の方へ${getEmoji()}\n\n最近当日だと\nお断りすることが\n増えてます${getEmoji()}\n\nごめんなさい${getEmoji()}\n\n前日までの予約なら\nほぼ確実に\nご案内できます${pickRandom(s.suffix)}`,
+      (s) => `完売からの\nお知らせ${getEmoji()}\n\n次の出勤は○日${getEmoji()}\n\n今のうちに\n予約しておくと\n安心${pickRandom(s.suffix)}\n\n${getName()}は\n待ってるよ${getEmoji()}`,
+      (s) => `完売ありがとう${getEmoji()}\n\n次の出勤情報を\n見逃さないように\nマイガール登録\nしておいてね${pickRandom(s.suffix)}\n\n登録してくれた方には\n限定写真も\nお届けしてるよ${getEmoji()}`
     ]
   },
   video: {
@@ -1552,6 +1613,41 @@ const okiniReplyTemplates = {
     (s,n,c) => `${c || '最近暑いね'}${s.emoji}\n${s.name}は${pickRandom(hobbies)}してたよ${s.emoji}\n${n ? n+'くんは' : ''}何してた？${s.emoji}`,
     (s,n,c) => `おつかれ${s.emoji}\n${s.name}今日${pickRandom(places)}行ってきた${s.emoji}\n${pickRandom(adjectives)}だった${s.emoji}\n${n ? n+'さんも' : ''}行ってみて${s.emoji}`,
     (s,n,c) => `${n ? n+'くん' : ''}元気？${s.emoji}\n今日の${s.name}は${pickRandom(['元気いっぱい','ちょっと眠い','テンション高め','まったりモード'])}だよ${s.emoji}`
+  ],
+  review: [
+    // 口コミお礼: 成約原則: 返報性（感謝→次回来店）＋具体的肯定（嬉しい内容引用）
+    (s,n,c) => `${n ? n+'さん' : ''}${s.emoji}\n口コミ書いてくれてありがとう${s.emoji}\n${c ? c+'って書いてくれたの嬉しすぎる' : 'めちゃくちゃ嬉しい'}${s.emoji}\n読んで何回もニヤニヤしちゃった${s.emoji}\nまた会えるの楽しみにしてるね${s.emoji}`,
+    (s,n,c) => `口コミありがとう${s.emoji}\n${n ? n+'さんの' : ''}言葉が嬉しくて${s.name}テンション上がった${s.emoji}\n${c ? '「'+c+'」って最高の褒め言葉だよ' : 'たくさん書いてくれて感動した'}${s.emoji}\nまた楽しい時間つくろうね${s.emoji}`,
+    (s,n,c) => `${n ? n+'さん' : ''}${s.emoji}\n口コミ見たよ${s.emoji}\n嬉しくて何回も読み返しちゃった${s.emoji}\n${c ? c+'って言ってもらえて照れた' : '素敵な言葉ありがとう'}${s.emoji}\nまた指名してね${s.emoji}`,
+    (s,n,c) => `口コミありがとうございます${s.emoji}\n${s.name}のことたくさん書いてくれて嬉しい${s.emoji}\n${c ? c+'って初めて言われたかも' : '読んでて恥ずかしくなっちゃった'}${s.emoji}\nこれからも頑張るね${s.emoji}`
+  ],
+  gift: [
+    // 差し入れお礼: 成約原則: 返報性＋具体的言及（もらった物に触れる）→特別感
+    (s,n,c) => `${n ? n+'さん' : ''}${s.emoji}\n差し入れありがとう${s.emoji}\n${c ? c+'早速いただいちゃった' : 'めっちゃ嬉しい'}${s.emoji}\n${s.name}のこと覚えてくれてたんだ${s.emoji}\n次会えるとき楽しみにしてるね${s.emoji}`,
+    (s,n,c) => `差し入れありがとう${s.emoji}\n${c ? c+'大好きなの知ってたの？' : '好みわかってるね'}${s.emoji}\n嬉しすぎて写真撮っちゃった${s.emoji}\nまた${n ? n+'さんに' : ''}会いたいな${s.emoji}`,
+    (s,n,c) => `${n ? n+'くん' : ''}ありがとう${s.emoji}\n${c ? c+'もらって元気出た' : 'プレゼント嬉しかった'}${s.emoji}\n${s.name}も何かお返ししたいな${s.emoji}\n次会えたときいっぱい甘えるね${s.emoji}`,
+    (s,n,c) => `差し入れ嬉しい${s.emoji}\n${c ? c+'美味しかったよ' : 'ありがたくいただきました'}${s.emoji}\n${n ? n+'さんって' : ''}優しいね${s.emoji}\nまたお話しようね${s.emoji}`
+  ],
+  mitene: [
+    // ミテネ/写メ日記リアクション返し: 成約原則: 行動承認（見てくれた事実に感謝）→関係強化
+    (s,n,c) => `ミテネありがとう${s.emoji}\n${n ? n+'さん' : ''}ちゃんと見てくれてるんだ${s.emoji}\n嬉しいな${s.emoji}\n${c ? c+'の投稿気になった？' : 'どれが気になった？'}${s.emoji}\n感想聞かせてね${s.emoji}`,
+    (s,n,c) => `${n ? n+'さん' : ''}${s.emoji}\n写メ日記見てくれたの？${s.emoji}\nありがとう${s.emoji}\n${c ? c+'は気合い入れて撮ったんだ' : 'いつも見てくれて嬉しい'}${s.emoji}\nもっと載せるから楽しみにしてて${s.emoji}`,
+    (s,n,c) => `見てくれてありがとう${s.emoji}\n${s.name}の日記チェックしてくれてるの嬉しい${s.emoji}\n${c ? '「'+c+'」って反応もらえて頑張れる' : 'いいねもらえると頑張れる'}${s.emoji}\nまた更新するね${s.emoji}`,
+    (s,n,c) => `ミテネ嬉しい${s.emoji}\n${n ? n+'さんが' : ''}反応してくれるとモチベ上がる${s.emoji}\n${c ? c+'どうだった？' : '次はどんなの見たい？'}${s.emoji}\nリクエストあったら教えてね${s.emoji}`
+  ],
+  dayof: [
+    // 予約当日フォロー: 成約原則: 期待感醸成＋安心感（気をつけて）→来店率向上
+    (s,n,c) => `${n ? n+'さん' : ''}${s.emoji}\n今日会えるの楽しみにしてる${s.emoji}\n${c ? c+'の時間だよね？' : ''}気をつけて来てね${s.emoji}\n${s.name}待ってるよ${s.emoji}`,
+    (s,n,c) => `今日はよろしくね${s.emoji}\n${n ? n+'さんに' : ''}会えるの嬉しい${s.emoji}\n${s.name}おしゃれして待ってるね${s.emoji}\n${c ? c+'楽しみにしてて' : '楽しい時間にしようね'}${s.emoji}`,
+    (s,n,c) => `もうすぐ会えるね${s.emoji}\n${n ? n+'さん' : ''}ドキドキしてるかな？${s.emoji}\n${s.name}もソワソワしてるよ${s.emoji}\n気をつけて来てね${s.emoji}`,
+    (s,n,c) => `${n ? n+'くん' : ''}${s.emoji}\n今日の予約ありがとう${s.emoji}\nたくさん楽しもうね${s.emoji}\n${c ? c+'も用意してるよ' : 'いっぱいお話しようね'}${s.emoji}\n待ってる${s.emoji}`
+  ],
+  greeting: [
+    // 初めまして返信（ユーザー発）: 成約原則: 即レス感＋親しみ→返信率UP→予約誘導
+    (s,n,c) => `${n ? n+'さん' : ''}はじめまして${s.emoji}\n${s.name}です${s.emoji}\nメッセージ嬉しい${s.emoji}\nプロフ見てくれたのかな？${s.emoji}\n気になることあったら何でも聞いてね${s.emoji}`,
+    (s,n,c) => `はじめまして${s.emoji}${s.name}だよ${s.emoji}\n${n ? n+'さん' : ''}メッセージありがとう${s.emoji}\n${c ? c+'が気になったの？' : 'どこで${s.name}のこと知ったの？'}${s.emoji}\nたくさんお話しようね${s.emoji}`,
+    (s,n,c) => `はじめまして${s.emoji}\n${s.name}です${s.emoji}\n${n ? n+'さん' : ''}からメッセージもらえて嬉しいな${s.emoji}\nよかったら遊びに来てね${s.emoji}\n楽しみに待ってる${s.emoji}`,
+    (s,n,c) => `${n ? n+'くん' : ''}はじめまして${s.emoji}\n${s.name}です${s.emoji}\nメッセージくれてありがとう${s.emoji}\n${s.name}のこと気になってくれた？${s.emoji}\n仲良くしてね${s.emoji}`
   ]
 };
 
@@ -1561,7 +1657,7 @@ function generateOkiniReply() {
   const name = document.getElementById('okiniReplyName').value.trim();
   const context = document.getElementById('okiniReplyContext').value.trim();
   const templates = okiniReplyTemplates[selectedReplyScene] || okiniReplyTemplates.interest;
-  const sceneLabels = { interest:'好み共感', question:'質問返し', diary:'日記/SNS', schedule:'スケジュール', booking:'予約サポート', thanks:'予約お礼', casual:'雑談' };
+  const sceneLabels = { interest:'好み共感', question:'質問返し', diary:'日記/SNS', schedule:'スケジュール', booking:'予約サポート', thanks:'予約お礼', casual:'雑談', review:'口コミお礼', gift:'差し入れお礼', mitene:'ミテネ返し', dayof:'当日フォロー', greeting:'初めまして返信' };
   let html = `<div style="text-align:center;font-weight:700;color:#c751c0;margin-bottom:12px;">返信テンプレ（${sceneLabels[selectedReplyScene]}）</div>`;
   const used = new Set();
   const count = Math.min(3, templates.length);

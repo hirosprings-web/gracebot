@@ -14,7 +14,6 @@
   distribution, or use of this software is strictly prohibited.
   ========================================
 -->
-<link rel="apple-touch-icon" sizes="180x180" href="icon.png">
 <title>ウルグレBOT</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -515,32 +514,44 @@ textarea { resize: vertical; min-height: 60px; }
 
 <script>
 // ============ パスワード設定 ============
-// 本格運用時: APP_PASSWORD にパスワード文字列を設定（例: 'ultragrace24'）
-// テスト中: null のままにしておくとパスワード不要
-const APP_PASSWORD = null;
+// 二重認証: URLパラメータ(?key=xxx) + PIN入力
+// 配布URL例: shamediary-bot.html?key=ultragrace
+// PIN: 口頭やグループLINEで女の子に伝える
+const URL_KEY = 'ultragrace';   // URLパラメータ ?key=xxx の正解値
+const APP_PIN = '7777';         // PIN入力の正解値
 
 // パスワードロック初期化
 (function initLock() {
-  if (!APP_PASSWORD) {
-    // パスワード未設定 → ロック画面を非表示、アプリ表示
-    document.getElementById('lockScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = '';
-    return;
-  }
-  // 既にログイン済みチェック（セッション中は再入力不要）
+  // 既にログイン済み（同一タブ・セッション中は再入力不要）
   if (sessionStorage.getItem('ulg_unlocked') === '1') {
     document.getElementById('lockScreen').style.display = 'none';
     document.getElementById('mainApp').style.display = '';
     return;
   }
-  // ロック画面表示、アプリ非表示
+  // URLパラメータチェック
+  var params = new URLSearchParams(window.location.search);
+  var urlKey = params.get('key');
+  if (urlKey !== URL_KEY) {
+    // URLキーが間違い or 無い → アクセス完全拒否（PIN画面も出さない）
+    document.getElementById('lockScreen').style.display = 'flex';
+    document.getElementById('mainApp').style.display = 'none';
+    document.getElementById('lockPass').placeholder = 'アクセスできません';
+    document.getElementById('lockPass').disabled = true;
+    document.querySelector('.lock-btn').disabled = true;
+    document.querySelector('.lock-btn').style.opacity = '0.4';
+    document.querySelector('.lock-sub').textContent = '正しいURLからアクセスしてください';
+    return;
+  }
+  // URLキー正解 → PIN入力画面を表示
   document.getElementById('lockScreen').style.display = 'flex';
   document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('lockPass').focus();
 })();
 
 function unlockApp() {
-  const input = document.getElementById('lockPass').value;
-  if (input === APP_PASSWORD) {
+  var input = document.getElementById('lockPass').value;
+  if (input === APP_PIN) {
+    sessionStorage.getItem || void 0;
     sessionStorage.setItem('ulg_unlocked', '1');
     document.getElementById('lockScreen').style.display = 'none';
     document.getElementById('mainApp').style.display = '';
